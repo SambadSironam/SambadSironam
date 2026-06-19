@@ -59,24 +59,18 @@ export function Footer() {
                 </p>
               </div>
             </div>
-            <p
-              className="text-blue-200 text-sm leading-relaxed mb-5"
-              style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-            >
-              সত্যের শিরোনাম, মানুষের কণ্ঠস্বর। বাংলার বিশ্বস্ত ডিজিটাল সংবাদমাধ্যম। সর্বশেষ সংবাদ, বিশ্লেষণ ও তথ্য পেতে আমাদের সাথে থাকুন।
-            </p>
             <div className="space-y-2 text-sm text-blue-200">
               <div className="flex items-center gap-2">
                 <Mail size={14} className="text-yellow-400 flex-shrink-0" />
-                <span style={{ fontFamily: "'Inter', sans-serif" }}>news@sambadsironam.com</span>
+                <span style={{ fontFamily: "'Inter', sans-serif" }}>contact@sambadsironam.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={14} className="text-yellow-400 flex-shrink-0" />
-                <span style={{ fontFamily: "'Inter', sans-serif" }}>+91 33 1234 5678</span>
+                <span style={{ fontFamily: "'Inter', sans-serif" }}>+91-8900568880 , +91-3345299592</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={14} className="text-yellow-400 flex-shrink-0" />
-                <span style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>কলকাতা, পশ্চিমবঙ্গ — ৭০০০০১</span>
+                <span style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>২০, সতীশ চন্দ্র ঘোষ লেন,মহেশ কলোনি,শ্রীরামপুর, হুগলি,পশ্চিমবঙ্গ – ৭১২২০১।</span>
               </div>
             </div>
 

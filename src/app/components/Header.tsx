@@ -9,31 +9,16 @@ import logoImg from "../../imports/ChatGPT_Image_Jan_21__2026_at_12_46_10_PM.png
 
 const NAV_ITEMS = [
   { label: "হোম", href: "/", children: [] },
+  { label: "কলকাতা", href: "/", children: [] },
   {
     label: "পশ্চিমবঙ্গ", href: "/category/west-bengal",
     children: [
-      { label: "কলকাতা", href: "/category/kolkata" },
-      { label: "জেলা সংবাদ", href: "/category/district" },
       { label: "উত্তরবঙ্গ", href: "/category/north-bengal" },
       { label: "দক্ষিণবঙ্গ", href: "/category/south-bengal" },
     ]
   },
-  {
-    label: "ভারত", href: "/category/india",
-    children: [
-      { label: "রাজনীতি", href: "/category/politics" },
-      { label: "অর্থনীতি", href: "/category/economy" },
-      { label: "সংসদ", href: "/category/parliament" },
-    ]
-  },
-  {
-    label: "বিশ্ব", href: "/category/world",
-    children: [
-      { label: "এশিয়া", href: "/category/asia" },
-      { label: "ইউরোপ", href: "/category/europe" },
-      { label: "আমেরিকা", href: "/category/america" },
-    ]
-  },
+  { label: "ভারত", href: "/", children: [] },
+  { label: "বিশ্ব", href: "/", children: [] },
   {
     label: "খেলাধুলা", href: "/category/sports",
     children: [
@@ -42,33 +27,19 @@ const NAV_ITEMS = [
       { label: "অন্যান্য", href: "/category/other-sports" },
     ]
   },
-  {
-    label: "বিনোদন", href: "/category/entertainment",
-    children: [
-      { label: "চলচ্চিত্র", href: "/category/movies" },
-      { label: "টেলিভিশন", href: "/category/television" },
-      { label: "সংগীত", href: "/category/music" },
-    ]
-  },
-  {
-    label: "প্রযুক্তি", href: "/category/technology",
-    children: [
-      { label: "মোবাইল", href: "/category/mobile" },
-      { label: "বিজ্ঞান", href: "/category/science" },
-      { label: "AI", href: "/category/ai" },
-    ]
-  },
-  {
-    label: "আরও", href: "#",
-    children: [
-      { label: "ব্যবসা", href: "/category/business" },
-      { label: "স্বাস্থ্য", href: "/category/health" },
-      { label: "শিক্ষা", href: "/category/education" },
-      { label: "জীবনধারা", href: "/category/lifestyle" },
-      { label: "জ্যোতিষ", href: "/category/astrology" },
-      { label: "ভ্রমণ", href: "/category/travel" },
-    ]
-  },
+  { label: "বিনোদন", href: "/", children: [] },
+  { label: "প্রযুক্তি", href: "/", children: [] },
+  { label: "স্বাস্থ্য", href: "/", children: [] },
+  { label: "শিক্ষা", href: "/", children: [] },
+  { label: "ব্যবসা", href: "/", children: [] },
+  { label: "ভ্রমণ", href: "/", children: [] },
+  { label: "জ্যোতিষ", href: "/", children: [] },
+  { label: "লাইভ টিভি", href: "/", children: [] },
+  { label: "ই-পেপার", href: "/", children: [] },
+  { label: "সংবাদ ভিডিও", href: "/", children: [] },
+  { label: "রান্না", href: "/", children: [] },
+  { label: "সম্পাদকীয়", href: "/", children: [] },
+  { label: "যোগাযোগ করুন", href: "/", children: [] },
 ];
 
 const BREAKING_ITEMS = [
@@ -182,9 +153,6 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
               <div className="hidden sm:block">
                 <div className="text-white font-bold leading-tight" style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "1.2rem" }}>
                   সংবাদ শিরোনাম
-                </div>
-                <div className="text-yellow-400 text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  সত্যের শিরোনাম, মানুষের কণ্ঠস্বর
                 </div>
               </div>
             </Link>
