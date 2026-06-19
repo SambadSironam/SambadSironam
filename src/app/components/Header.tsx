@@ -98,7 +98,7 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
   return (
     <>
       {/* Utility Bar */}
-      <div style={{ backgroundColor: "#242377" }} className="text-white text-xs py-1.5 hidden md:block">
+      <div style={{ backgroundColor: "#001657" }} className="text-white text-xs py-1.5 hidden md:block">
         <div className="max-w-[1440px] mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-gray-300">
