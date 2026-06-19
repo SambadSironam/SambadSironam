@@ -139,7 +139,7 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
       {/* Main Header */}
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-lg" : ""}`}
-        style={{ backgroundColor: darkMode ? "#0B1F3A" : "#0B1F3A" }}
+        style={{ backgroundColor: darkMode ? "#242377" : "#242377" }}
       >
         <div className="max-w-[1440px] mx-auto px-4">
           <div className="flex items-center justify-between py-2.5 gap-4">
