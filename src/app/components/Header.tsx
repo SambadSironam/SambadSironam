@@ -98,14 +98,14 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
   return (
     <>
       {/* Utility Bar */}
-      <div style={{ backgroundColor: "#0B1F3A" }} className="text-white text-xs py-1.5 hidden md:block">
+      <div style={{ backgroundColor: "#242377" }} className="text-white text-xs py-1.5 hidden md:block">
         <div className="max-w-[1440px] mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-gray-300">
               <Globe size={12} />
               {today}
             </span>
-            <span className="text-gray-500">|</span>
+            {/*<span className="text-gray-500">|</span>
             <a href="/live-tv" className="flex items-center gap-1 text-red-400 animate-pulse">
               <Radio size={12} />
               লাইভ টিভি
@@ -113,7 +113,7 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
             <a href="/epaper" className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors">
               <Newspaper size={12} />
               ই-পেপার
-            </a>
+            </a>*/}
           </div>
           <div className="flex items-center gap-3">
             <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-red-400 transition-colors">
@@ -144,6 +144,32 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
         <div className="max-w-[1440px] mx-auto px-4">
           <div className="flex items-center justify-between py-2.5 gap-4">
             {/* Logo */}
+            {/*<Link to="/" className="flex-shrink-0 flex items-center gap-2">
+              <img
+                src={logoImg}
+                alt="Sambad Sironam Logo"
+                className="h-12 w-12 object-contain rounded-xl"
+              /> */}
+              {/*<div className="hidden sm:block">
+                <div className="text-white font-bold leading-tight" style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "1.2rem" }}>
+                                     
+                </div>
+              </div> */}
+              <div className="flex items-center gap-4">
+            {/*<span className="text-gray-500">|</span>*/}
+            <a href="/live-tv" className="flex items-center gap-1 text-red-400 animate-pulse">
+              <Radio size={12} />
+              লাইভ টিভি
+            </a>
+            <a href="/epaper" className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors">
+              <Newspaper size={12} />
+              ই-পেপার
+            </a>
+          </div>
+           
+
+            {/* Center Ad Banner */}
+            
             <Link to="/" className="flex-shrink-0 flex items-center gap-2">
               <img
                 src={logoImg}
@@ -151,18 +177,11 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
                 className="h-12 w-12 object-contain rounded-xl"
               />
               <div className="hidden sm:block">
-                <div className="text-white font-bold leading-tight" style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "1.2rem" }}>
+                <div className="text-white font-bold leading-tight" style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "3rem" }}>
                   সংবাদ শিরোনাম
                 </div>
               </div>
             </Link>
-
-            {/* Center Ad Banner */}
-            <div className="hidden lg:flex items-center justify-center flex-1">
-              <div className="bg-white/5 border border-white/10 rounded px-6 py-1.5 text-gray-400 text-xs italic">
-                বিজ্ঞাপন — ৭২৮×৯০
-              </div>
-            </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
@@ -242,7 +261,7 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
       </header>
 
       {/* Breaking News Ticker */}
-      <div className="bg-red-600 text-white py-2 overflow-hidden">
+      <div className="bg-red-800 text-white py-2 overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-3">
           <span className="flex-shrink-0 flex items-center gap-1.5 bg-white text-red-600 text-xs font-bold px-3 py-1 rounded-full">
             <Zap size={11} />
