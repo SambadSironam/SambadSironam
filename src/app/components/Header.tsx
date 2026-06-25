@@ -122,7 +122,7 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors text-xs font-bold">f</a>
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-sky-400 transition-colors text-xs font-bold">𝕏</a>
             <span className="text-gray-500">|</span>
-            <a href="/login" className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors">
+            <a href="/admin" className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors">
               <User size={12} />
               লগইন
             </a>

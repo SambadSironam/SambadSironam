@@ -5,6 +5,8 @@ import { HomePage } from "./components/HomePage";
 import { ArticlePage } from "./components/ArticlePage";
 import { CategoryPage } from "./components/CategoryPage";
 import { Footer } from "./components/Footer";
+import { AdminLogin } from "./components/AdminLogin";
+import { AdminDashboard } from "./components/AdminDashboard";
 
 function SearchPage() {
   return (
@@ -101,6 +103,8 @@ function AppLayout({ darkMode, setDarkMode }: { darkMode: boolean; setDarkMode: 
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/live-tv" element={<LiveTVPage />} />

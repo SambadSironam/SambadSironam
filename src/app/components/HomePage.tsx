@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { db } from "../../firebase";
 import { Link } from "react-router";
 import {
   TrendingUp, Clock, Eye, Heart, Share2, Bookmark, Play,
