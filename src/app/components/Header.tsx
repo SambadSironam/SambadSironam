@@ -1,15 +1,39 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Search, Sun, Moon, Menu, X, ChevronDown, Bell, User,
-  Globe, Tv, Newspaper, Youtube, Mic, Camera, Bookmark,
-  TrendingUp, Zap, Radio
+  Mail,
+  Phone,
+  MapPin,
+  ArrowUp,
+  Search,
+  Sun,
+  Moon,
+  Menu,
+  X,
+  ChevronDown,
+  Bell,
+  User,
+  Globe,
+  Tv,
+  Newspaper,
+  Mic,
+  Camera,
+  Bookmark,
+  TrendingUp,
+  Zap,
+  Radio,
 } from "lucide-react";
-import logoImg from "../../imports/ChatGPT_Image_Jan_21__2026_at_12_46_10_PM.png";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaYoutube,
+} from "react-icons/fa6";
+
+import logoImg from "../../imports/logo.png";
 
 const NAV_ITEMS = [
   { label: "হোম", href: "/", children: [] },
-  { label: "কলকাতা", href: "/", children: [] },
+  { label: "কলকাতা", href: "/kolkata", children: [] },
   {
     label: "পশ্চিমবঙ্গ", href: "/category/west-bengal",
     children: [
@@ -17,8 +41,8 @@ const NAV_ITEMS = [
       { label: "দক্ষিণবঙ্গ", href: "/category/south-bengal" },
     ]
   },
-  { label: "ভারত", href: "/", children: [] },
-  { label: "বিশ্ব", href: "/", children: [] },
+  { label: "ভারত", href: "/india", children: [] },
+  { label: "বিশ্ব", href: "/world", children: [] },
   {
     label: "খেলাধুলা", href: "/category/sports",
     children: [
@@ -27,19 +51,19 @@ const NAV_ITEMS = [
       { label: "অন্যান্য", href: "/category/other-sports" },
     ]
   },
-  { label: "বিনোদন", href: "/", children: [] },
-  { label: "প্রযুক্তি", href: "/", children: [] },
-  { label: "স্বাস্থ্য", href: "/", children: [] },
-  { label: "শিক্ষা", href: "/", children: [] },
-  { label: "ব্যবসা", href: "/", children: [] },
-  { label: "ভ্রমণ", href: "/", children: [] },
-  { label: "জ্যোতিষ", href: "/", children: [] },
-  { label: "লাইভ টিভি", href: "/", children: [] },
-  { label: "ই-পেপার", href: "/", children: [] },
-  { label: "সংবাদ ভিডিও", href: "/", children: [] },
-  { label: "রান্না", href: "/", children: [] },
-  { label: "সম্পাদকীয়", href: "/", children: [] },
-  { label: "যোগাযোগ করুন", href: "/", children: [] },
+  { label: "বিনোদন", href: "/entertainment", children: [] },
+  { label: "প্রযুক্তি", href: "/technology", children: [] },
+  { label: "স্বাস্থ্য", href: "/health", children: [] },
+  { label: "শিক্ষা", href: "/education", children: [] },
+  { label: "ব্যবসা", href: "/business", children: [] },
+  { label: "ভ্রমণ", href: "/travels", children: [] },
+  { label: "জ্যোতিষ", href: "/Astrology", children: [] },
+  { label: "লাইভ টিভি", href: "/live-tv", children: [] },
+  { label: "ই-পেপার", href: "/epaper", children: [] },
+  { label: "সংবাদ ভিডিও", href: "/videos", children: [] },
+  { label: "রান্না", href: "/cooking", children: [] },
+  { label: "সম্পাদকীয়", href: "/editorial", children: [] },
+  { label: "যোগাযোগ করুন", href: "/contact us", children: [] },
 ];
 
 const BREAKING_ITEMS = [
@@ -91,9 +115,28 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
     }
   };
 
-  const today = new Date().toLocaleDateString("bn-IN", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric"
-  });
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCurrentTime(new Date());
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
+const today = currentTime.toLocaleDateString("bn-IN", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+const time = currentTime.toLocaleTimeString("bn-IN", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+});
 
   return (
     <>
@@ -101,10 +144,13 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
       <div style={{ backgroundColor: "#001657" }} className="text-white text-xs py-1.5 hidden md:block">
         <div className="max-w-[1440px] mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-gray-300">
-              <Globe size={12} />
-              {today}
-            </span>
+            <span className="flex items-center gap-2 text-gray-300">
+  <Globe size={12} />
+  <span>{today}</span>
+  <span className="text-gray-300 ">
+    | {time}
+  </span>
+</span>
             {/*<span className="text-gray-500">|</span>
             <a href="/live-tv" className="flex items-center gap-1 text-red-400 animate-pulse">
               <Radio size={12} />
@@ -116,16 +162,39 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
             </a>*/}
           </div>
           <div className="flex items-center gap-3">
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-red-400 transition-colors">
-              <Youtube size={13} />
-            </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors text-xs font-bold">f</a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-sky-400 transition-colors text-xs font-bold">𝕏</a>
-            <span className="text-gray-500">|</span>
-            <a href="/admin" className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors">
-              <User size={12} />
-              লগইন
-            </a>
+            <a
+  href="https://www.youtube.com/@sambadsironamdigital"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-red-400 hover:text-gray-400 transition-colors"
+>
+  <FaYoutube size={23} />
+</a>
+
+<a
+  href="https://www.facebook.com/sambadsironam"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-400 hover:text-gray-400 transition-colors"
+>
+  <FaFacebookF size={15} />
+</a>
+
+<a
+  href="https://instagram.com/sambadsironam"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-pink-400 hover:text-gray-400 transition-colors"
+>
+  <FaInstagram size={18} />
+</a>
+            <Link
+  to="/admin"
+  className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors"
+>
+  <User size={12} />
+  লগইন
+</Link>
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="text-gray-400 hover:text-white transition-colors"
@@ -157,14 +226,14 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
               </div> */}
               <div className="flex items-center gap-4">
             {/*<span className="text-gray-500">|</span>*/}
-            <a href="/live-tv" className="flex items-center gap-1 text-red-400 animate-pulse">
+            <Link to="/live-tv" className="flex items-center gap-1 text-red-400 animate-pulse">
               <Radio size={12} />
               লাইভ টিভি
-            </a>
-            <a href="/epaper" className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors">
+            </Link>
+            <Link to="/epaper" className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors">
               <Newspaper size={12} />
               ই-পেপার
-            </a>
+            </Link>
           </div>
            
 
@@ -191,13 +260,13 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
               >
                 <Search size={18} />
               </button>
-              <a href="/notifications" className="text-white hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10 hidden sm:flex relative">
+              <Link to="/notifications" className="text-white hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10 hidden sm:flex relative">
                 <Bell size={18} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              </a>
-              <a href="/saved" className="text-white hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10 hidden sm:flex">
+              </Link>
+              <Link to="/saved" className="text-white hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10 hidden sm:flex">
                 <Bookmark size={18} />
-              </a>
+              </Link>
               <button
                 className="sm:hidden text-white p-2"
                 onClick={() => setMobileOpen(!mobileOpen)}
@@ -250,10 +319,10 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
                 </div>
               ))}
               <div className="ml-auto flex items-center gap-2 py-1.5">
-                <a href="/live-tv" className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-full transition-colors font-medium">
+                <Link to="/live-tv" className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-full transition-colors font-medium">
                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                   লাইভ
-                </a>
+                </Link>
               </div>
             </nav>
           </div>
@@ -338,8 +407,8 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
               ))}
             </div>
             <div className="mt-6 flex gap-3">
-              <a href="/login" className="flex-1 bg-red-600 text-white text-center py-2.5 rounded-lg font-medium">লগইন</a>
-              <a href="/register" className="flex-1 border border-white/20 text-white text-center py-2.5 rounded-lg font-medium">নিবন্ধন</a>
+              <Link to="/login" className="flex-1 bg-red-600 text-white text-center py-2.5 rounded-lg font-medium">লগইন</Link>
+              <Link to="/register" className="flex-1 border border-white/20 text-white text-center py-2.5 rounded-lg font-medium">নিবন্ধন</Link>
             </div>
           </div>
         </div>

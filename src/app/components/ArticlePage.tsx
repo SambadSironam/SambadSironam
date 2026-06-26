@@ -1,10 +1,27 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useParams } from "react-router-dom";
 import {
-  Clock, Eye, Share2, Bookmark, Heart, ChevronRight,
-  Facebook, Twitter, Link2, Minus, Plus, Headphones,
-  MessageSquare, ThumbsUp, User, ChevronUp
+  Clock,
+  Eye,
+  Share2,
+  Bookmark,
+  Heart,
+  ChevronRight,
+  Link2,
+  Minus,
+  Plus,
+  Headphones,
+  MessageSquare,
+  ThumbsUp,
+  User,
+  ChevronUp
 } from "lucide-react";
+
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaYoutube
+} from "react-icons/fa6";
 
 const ARTICLE_DATA = {
   id: "1",
@@ -247,10 +264,10 @@ export function ArticlePage() {
                 </p>
                 <div className="flex items-center gap-3 flex-wrap">
                   <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
-                    <Facebook size={15} /> ফেসবুক
+                    <FaFacebookF size={15} /> ফেসবুক
                   </button>
                   <button className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-600 transition-colors">
-                    <Twitter size={15} /> টুইটার
+                    <FaInstagram size={15} /> টুইটার
                   </button>
                   <button className="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     <Link2 size={15} /> লিংক কপি

@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
 
 export function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
@@ -12,7 +15,7 @@ export function AdminLogin() {
 
       alert("Login Successful!");
 
-      window.location.href = "/admin/dashboard";
+      navigate("/admin/dashboard");
     } catch (error: any) {
       alert(error.message);
     }

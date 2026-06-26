@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import {
   TrendingUp, Clock, Eye, Heart, Share2, Bookmark, Play,
   ChevronRight, Star, Zap, Camera, BarChart2, BookOpen,
@@ -235,9 +235,15 @@ function AdBanner({ label = "বিজ্ঞাপন", size = "728×90" }: { la
 }
 
 export function HomePage() {
-  const [activeTab, setActiveTab] = useState("সব সংবাদ");
-  const tabs = ["সব সংবাদ", "কলকাতা", "রাজনীতি", "খেলাধুলা", "বিনোদন"];
+  const [activeTab, setActiveTab] = useState("মুখ্য সংবাদ");
 
+const tabs = [
+  "মুখ্য সংবাদ",
+  "কলকাতা",
+  "রাজনীতি",
+  "খেলাধুলা",
+  "বিনোদন",
+];
   return (
     <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#121212]">
       {/* Hero Section */}

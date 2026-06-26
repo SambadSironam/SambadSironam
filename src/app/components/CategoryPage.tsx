@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useParams } from "react-router-dom";
 import { Clock, Eye, ChevronRight, TrendingUp, Filter, Grid, List } from "lucide-react";
 
 const CATEGORY_META: Record<string, { label: string; color: string; description: string; icon: string }> = {

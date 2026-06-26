@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Header } from "./components/Header";
 import { HomePage } from "./components/HomePage";
 import { ArticlePage } from "./components/ArticlePage";
@@ -25,6 +25,7 @@ function SearchPage() {
     </div>
   );
 }
+
 
 function LiveTVPage() {
   return (
@@ -132,7 +133,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <AppLayout darkMode={darkMode} setDarkMode={handleDarkMode} />
-    </BrowserRouter>
+  <AppLayout darkMode={darkMode} setDarkMode={handleDarkMode} />
+</BrowserRouter>
   );
 }

@@ -1,6 +1,7 @@
-import { Link } from "react-router";
-import { Youtube, Mail, Phone, MapPin, ArrowUp } from "lucide-react";
-import logoImg from "../../imports/ChatGPT_Image_Jan_21__2026_at_12_46_10_PM.png";
+import { Link } from "react-router-dom";
+import { Mail, Phone, MapPin, ArrowUp } from "lucide-react";
+import logoImg from "../../imports/logo.png";
+import { FaYoutube } from "react-icons/fa6";
 
 const FOOTER_LINKS = [
   {
@@ -77,9 +78,7 @@ export function Footer() {
             {/* Social */}
             <div className="flex items-center gap-3 mt-5">
               {[
-                { label: "f", color: "#1877F2", title: "Facebook" },
-                { label: "𝕏", color: "#000000", title: "Twitter" },
-                { label: "in", color: "#0A66C2", title: "LinkedIn" },
+                { label: "f", color: "#1877F2", title: "Facebook" }
               ].map(s => (
                 <a
                   key={s.title}
@@ -96,7 +95,7 @@ export function Footer() {
                 title="YouTube"
                 className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
               >
-                <Youtube size={14} />
+                <FaYoutube size={14} />
               </a>
             </div>
           </div>
