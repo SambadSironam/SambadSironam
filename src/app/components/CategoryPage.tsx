@@ -1,66 +1,648 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Clock, Eye, ChevronRight, TrendingUp, Filter, Grid, List } from "lucide-react";
+import {
+  collection,
+  getDocs,
+} from "firebase/firestore";
 
-const CATEGORY_META: Record<string, { label: string; color: string; description: string; icon: string }> = {
-  "west-bengal": { label: "পশ্চিমবঙ্গ", color: "#D71920", description: "পশ্চিমবঙ্গের সর্বশেষ সংবাদ ও আপডেট", icon: "🏛️" },
-  "kolkata": { label: "কলকাতা", color: "#D71920", description: "মহানগরী কলকাতার খবরাখবর", icon: "🌆" },
-  "india": { label: "ভারত", color: "#F4B400", description: "ভারতের জাতীয় সংবাদ", icon: "🇮🇳" },
-  "politics": { label: "রাজনীতি", color: "#0B1F3A", description: "দেশ-বিদেশের রাজনৈতিক সংবাদ", icon: "⚖️" },
-  "sports": { label: "খেলাধুলা", color: "#1B8A5A", description: "ক্রিকেট, ফুটবল ও অন্যান্য খেলার খবর", icon: "🏏" },
-  "cricket": { label: "ক্রিকেট", color: "#1B8A5A", description: "ক্রিকেটের সর্বশেষ আপডেট", icon: "🏏" },
-  "entertainment": { label: "বিনোদন", color: "#F4B400", description: "চলচ্চিত্র, টেলিভিশন ও বিনোদনের খবর", icon: "🎬" },
-  "technology": { label: "প্রযুক্তি", color: "#0B1F3A", description: "প্রযুক্তি ও বিজ্ঞানের সর্বশেষ আপডেট", icon: "💻" },
-  "business": { label: "ব্যবসা", color: "#F4B400", description: "অর্থনীতি ও ব্যবসার সংবাদ", icon: "💹" },
-  "world": { label: "বিশ্ব", color: "#0B1F3A", description: "আন্তর্জাতিক সংবাদ ও বিশ্বের খবর", icon: "🌍" },
+import { db } from "../../firebase";
+
+const CATEGORY_META: Record<
+  string,
+  {
+    label: string;
+    color: string;
+    description: string;
+    icon: string;
+  }
+> = {
+    "west-bengal": {
+    label: "পশ্চিমবঙ্গ",
+    color: "#D71920",
+    description: "পশ্চিমবঙ্গের সর্বশেষ সংবাদ",
+    icon: "🏛️",
+    
+  },
+  "north-bengal": {
+  label: "উত্তরবঙ্গ",
+  color: "#D71920",
+  description: "উত্তরবঙ্গের সর্বশেষ সংবাদ",
+  icon: "🏔️",
+},
+
+"south-bengal": {
+  label: "দক্ষিণবঙ্গ",
+  color: "#D71920",
+  description: "দক্ষিণবঙ্গের সর্বশেষ সংবাদ",
+  icon: "🌾",
+},
+
+  "kolkata": {
+    label: "কলকাতা",
+    color: "#C62828",
+    description: "কলকাতার সর্বশেষ সংবাদ",
+    icon: "🌆",
+  },
+
+  "india": {
+    label: "ভারত",
+    color: "#FF9933",
+    description: "ভারতের জাতীয় সংবাদ",
+    icon: "🇮🇳",
+  },
+
+  "world": {
+    label: "বিশ্ব",
+    color: "#0B1F3A",
+    description: "আন্তর্জাতিক সংবাদ",
+    icon: "🌍",
+  },
+
+  "politics": {
+    label: "রাজনীতি",
+    color: "#1E3A8A",
+    description: "রাজনৈতিক সংবাদ",
+    icon: "⚖️",
+  },
+
+  "crime": {
+    label: "অপরাধ",
+    color: "#B91C1C",
+    description: "অপরাধ সংক্রান্ত সংবাদ",
+    icon: "🚔",
+  },
+
+  "accident": {
+    label: "দুর্ঘটনা",
+    color: "#EF4444",
+    description: "দুর্ঘটনার খবর",
+    icon: "🚑",
+  },
+
+  "sports": {
+    label: "খেলাধুলা",
+    color: "#15803D",
+    description: "খেলাধুলার সর্বশেষ সংবাদ",
+    icon: "🏆",
+  },
+
+  "cricket": {
+    label: "ক্রিকেট",
+    color: "#16A34A",
+    description: "ক্রিকেট সংবাদ",
+    icon: "🏏",
+  },
+
+  "football": {
+    label: "ফুটবল",
+    color: "#22C55E",
+    description: "ফুটবল সংবাদ",
+    icon: "⚽",
+  },
+
+  "ipl": {
+    label: "আইপিএল",
+    color: "#7C3AED",
+    description: "আইপিএল সংবাদ",
+    icon: "🏆",
+  },
+
+  "tennis": {
+    label: "টেনিস",
+    color: "#84CC16",
+    description: "টেনিস সংবাদ",
+    icon: "🎾",
+  },
+
+  "other-sports": {
+    label: "অন্যান্য খেলা",
+    color: "#059669",
+    description: "অন্যান্য খেলাধুলার সংবাদ",
+    icon: "🥇",
+  },
+
+  "business": {
+    label: "ব্যবসা",
+    color: "#D97706",
+    description: "ব্যবসা ও বাণিজ্যের সংবাদ",
+    icon: "💹",
+  },
+
+  "economy": {
+    label: "অর্থনীতি",
+    color: "#F59E0B",
+    description: "অর্থনীতির খবর",
+    icon: "📈",
+  },
+
+  "stock-market": {
+    label: "শেয়ার বাজার",
+    color: "#EA580C",
+    description: "শেয়ার বাজারের সংবাদ",
+    icon: "📊",
+  },
+
+  "startup": {
+    label: "স্টার্টআপ",
+    color: "#FB923C",
+    description: "স্টার্টআপ ও উদ্যোক্তা",
+    icon: "🚀",
+  },
+
+  "cryptocurrency": {
+    label: "ক্রিপ্টোকারেন্সি",
+    color: "#FACC15",
+    description: "ক্রিপ্টোকারেন্সির খবর",
+    icon: "₿",
+  },
+
+  "technology": {
+    label: "প্রযুক্তি",
+    color: "#2563EB",
+    description: "প্রযুক্তির সর্বশেষ সংবাদ",
+    icon: "💻",
+  },
+
+  "ai": {
+    label: "কৃত্রিম বুদ্ধিমত্তা",
+    color: "#4338CA",
+    description: "AI সংক্রান্ত সংবাদ",
+    icon: "🤖",
+  },
+
+  "mobile": {
+    label: "মোবাইল",
+    color: "#0284C7",
+    description: "মোবাইল সংবাদ",
+    icon: "📱",
+  },
+
+  "gadgets": {
+    label: "গ্যাজেট",
+    color: "#0EA5E9",
+    description: "গ্যাজেট রিভিউ ও সংবাদ",
+    icon: "⌚",
+  },
+
+  "cyber-security": {
+    label: "সাইবার নিরাপত্তা",
+    color: "#1D4ED8",
+    description: "সাইবার নিরাপত্তা",
+    icon: "🛡️",
+  },
+
+    "entertainment": {
+    label: "বিনোদন",
+    color: "#EC4899",
+    description: "বিনোদন জগতের সর্বশেষ সংবাদ",
+    icon: "🎬",
+  },
+
+  "tollywood": {
+    label: "টলিউড",
+    color: "#F97316",
+    description: "টলিউড সংবাদ",
+    icon: "🎭",
+  },
+
+  "bollywood": {
+    label: "বলিউড",
+    color: "#DC2626",
+    description: "বলিউড সংবাদ",
+    icon: "🎥",
+  },
+
+  "hollywood": {
+    label: "হলিউড",
+    color: "#7C2D12",
+    description: "হলিউড সংবাদ",
+    icon: "🎞️",
+  },
+
+  "ott": {
+    label: "ওটিটি",
+    color: "#8B5CF6",
+    description: "ওটিটি প্ল্যাটফর্ম সংবাদ",
+    icon: "📺",
+  },
+
+  "television": {
+    label: "টেলিভিশন",
+    color: "#2563EB",
+    description: "টেলিভিশন সংবাদ",
+    icon: "📡",
+  },
+
+  "celebrities": {
+    label: "তারকা",
+    color: "#F43F5E",
+    description: "তারকাদের খবর",
+    icon: "⭐",
+  },
+
+  "health": {
+    label: "স্বাস্থ্য",
+    color: "#DC2626",
+    description: "স্বাস্থ্য সংক্রান্ত সংবাদ",
+    icon: "🏥",
+  },
+
+  "fitness": {
+    label: "ফিটনেস",
+    color: "#16A34A",
+    description: "ফিটনেস সংবাদ",
+    icon: "💪",
+  },
+
+  "medical": {
+    label: "চিকিৎসা",
+    color: "#EF4444",
+    description: "চিকিৎসা ও হাসপাতালের খবর",
+    icon: "🩺",
+  },
+
+  "education": {
+    label: "শিক্ষা",
+    color: "#2563EB",
+    description: "শিক্ষা সংক্রান্ত সংবাদ",
+    icon: "🎓",
+  },
+
+  "school": {
+    label: "স্কুল",
+    color: "#1D4ED8",
+    description: "স্কুল সংবাদ",
+    icon: "🏫",
+  },
+
+  "college": {
+    label: "কলেজ",
+    color: "#3B82F6",
+    description: "কলেজ সংবাদ",
+    icon: "🎒",
+  },
+
+  "competitive-exams": {
+    label: "প্রতিযোগিতামূলক পরীক্ষা",
+    color: "#0EA5E9",
+    description: "চাকরি ও প্রবেশিকা পরীক্ষার খবর",
+    icon: "📖",
+  },
+
+  "results": {
+    label: "ফলাফল",
+    color: "#06B6D4",
+    description: "পরীক্ষার ফলাফল",
+    icon: "📜",
+  },
+
+  "career": {
+    label: "ক্যারিয়ার",
+    color: "#0284C7",
+    description: "ক্যারিয়ার সংক্রান্ত সংবাদ",
+    icon: "🎯",
+  },
+
+  "jobs": {
+    label: "চাকরি",
+    color: "#6D4C41",
+    description: "চাকরির খবর",
+    icon: "💼",
+  },
+
+  "environment": {
+    label: "পরিবেশ",
+    color: "#15803D",
+    description: "পরিবেশ সংক্রান্ত সংবাদ",
+    icon: "🌿",
+  },
+
+  "weather": {
+    label: "আবহাওয়া",
+    color: "#0EA5E9",
+    description: "আবহাওয়ার সর্বশেষ আপডেট",
+    icon: "⛅",
+  },
+
+  "agriculture": {
+    label: "কৃষি",
+    color: "#65A30D",
+    description: "কৃষি সংবাদ",
+    icon: "🌾",
+  },
+
+  "science": {
+    label: "বিজ্ঞান",
+    color: "#0284C7",
+    description: "বিজ্ঞান সংবাদ",
+    icon: "🔬",
+  },
+
+  "space": {
+    label: "মহাকাশ",
+    color: "#312E81",
+    description: "মহাকাশ গবেষণার সংবাদ",
+    icon: "🚀",
+  },
+
+  "lifestyle": {
+    label: "লাইফস্টাইল",
+    color: "#9333EA",
+    description: "লাইফস্টাইল সংবাদ",
+    icon: "🏡",
+  },
+
+  "travel": {
+    label: "ভ্রমণ",
+    color: "#0F766E",
+    description: "ভ্রমণ সংবাদ",
+    icon: "✈️",
+  },
+
+  "food": {
+    label: "খাদ্য",
+    color: "#EA580C",
+    description: "খাবার ও রেসিপি",
+    icon: "🍲",
+  },
+
+  "fashion": {
+    label: "ফ্যাশন",
+    color: "#DB2777",
+    description: "ফ্যাশন সংবাদ",
+    icon: "👗",
+  },
+
+  "relationship": {
+    label: "সম্পর্ক",
+    color: "#E11D48",
+    description: "সম্পর্ক ও পরিবার",
+    icon: "❤️",
+  },
+
+    "religion": {
+    label: "ধর্ম",
+    color: "#F97316",
+    description: "ধর্মীয় সংবাদ",
+    icon: "🕉️",
+  },
+
+  "astrology": {
+    label: "রাশিফল",
+    color: "#8B5CF6",
+    description: "রাশিফল ও জ্যোতিষ সংবাদ",
+    icon: "🔮",
+  },
+
+  "automobile": {
+    label: "অটোমোবাইল",
+    color: "#475569",
+    description: "গাড়ি ও বাইকের সংবাদ",
+    icon: "🚗",
+  },
+
+  "opinion": {
+    label: "মতামত",
+    color: "#6D4C41",
+    description: "বিশেষজ্ঞদের মতামত",
+    icon: "💬",
+  },
+
+  "editorial": {
+    label: "সম্পাদকীয়",
+    color: "#5D4037",
+    description: "সম্পাদকীয় নিবন্ধ",
+    icon: "✍️",
+  },
+
+  "history": {
+    label: "ইতিহাস",
+    color: "#795548",
+    description: "ইতিহাস বিষয়ক সংবাদ ও বিশেষ প্রতিবেদন",
+    icon: "📜",
+  },
+
+  "festivals": {
+    label: "উৎসব",
+    color: "#F59E0B",
+    description: "উৎসব ও সংস্কৃতি",
+    icon: "🎉",
+  },
+
+  "government-schemes": {
+    label: "সরকারি প্রকল্প",
+    color: "#1D4ED8",
+    description: "কেন্দ্র ও রাজ্য সরকারের বিভিন্ন প্রকল্প",
+    icon: "🏛️",
+  },
+
+  "international": {
+    label: "আন্তর্জাতিক",
+    color: "#1E3A8A",
+    description: "আন্তর্জাতিক সংবাদ",
+    icon: "🌐",
+  },
+
+  "national": {
+    label: "জাতীয়",
+    color: "#EA580C",
+    description: "জাতীয় সংবাদ",
+    icon: "🇮🇳",
+  },
+
+  default: {
+    label: "সকল সংবাদ",
+    color: "#D71920",
+    description: "সর্বশেষ সংবাদ",
+    icon: "📰",
+  },
+
+    "defence": {
+    label: "প্রতিরক্ষা",
+    color: "#374151",
+    description: "প্রতিরক্ষা সংক্রান্ত সংবাদ",
+    icon: "🪖",
+  },
+
+  "railways": {
+    label: "রেল",
+    color: "#DC2626",
+    description: "রেলওয়ে সংবাদ",
+    icon: "🚆",
+  },
+
+  "metro": {
+    label: "মেট্রো",
+    color: "#0284C7",
+    description: "মেট্রো রেলের খবর",
+    icon: "🚇",
+  },
+
+  "aviation": {
+    label: "বিমান",
+    color: "#2563EB",
+    description: "বিমান চলাচলের সংবাদ",
+    icon: "✈️",
+  },
+
+  "banking": {
+    label: "ব্যাংকিং",
+    color: "#16A34A",
+    description: "ব্যাংকিং ও আর্থিক সংবাদ",
+    icon: "🏦",
+  },
+
+  "insurance": {
+    label: "বীমা",
+    color: "#0F766E",
+    description: "বীমা সংক্রান্ত সংবাদ",
+    icon: "🛡️",
+  },
+
+  "real-estate": {
+    label: "রিয়েল এস্টেট",
+    color: "#92400E",
+    description: "রিয়েল এস্টেট সংবাদ",
+    icon: "🏢",
+  },
+
+  "startup-india": {
+    label: "স্টার্টআপ ইন্ডিয়া",
+    color: "#7C3AED",
+    description: "স্টার্টআপ ইন্ডিয়া সংবাদ",
+    icon: "🚀",
+  },
+
+  "women": {
+    label: "নারী",
+    color: "#DB2777",
+    description: "নারী বিষয়ক সংবাদ",
+    icon: "👩",
+  },
+
+  "children": {
+    label: "শিশু",
+    color: "#EA580C",
+    description: "শিশু বিষয়ক সংবাদ",
+    icon: "🧒",
+  },
+
+  "senior-citizen": {
+    label: "প্রবীণ",
+    color: "#78716C",
+    description: "প্রবীণ নাগরিকদের সংবাদ",
+    icon: "👴",
+  },
+
+  "exclusive": {
+    label: "এক্সক্লুসিভ",
+    color: "#B91C1C",
+    description: "এক্সক্লুসিভ প্রতিবেদন",
+    icon: "⭐",
+  },
+
+  "fact-check": {
+    label: "ফ্যাক্ট চেক",
+    color: "#2563EB",
+    description: "ফ্যাক্ট চেক প্রতিবেদন",
+    icon: "✔️",
+  },
+
+  "investigation": {
+    label: "অনুসন্ধান",
+    color: "#7C2D12",
+    description: "অনুসন্ধানমূলক প্রতিবেদন",
+    icon: "🔍",
+  },
+
+  "special-report": {
+    label: "বিশেষ প্রতিবেদন",
+    color: "#9333EA",
+    description: "বিশেষ প্রতিবেদন",
+    icon: "📰",
+  },
 };
 
-const MOCK_ARTICLES = Array.from({ length: 12 }, (_, i) => ({
-  id: `cat-${i + 1}`,
-  title: [
-    "পশ্চিমবঙ্গে নতুন সরকারি প্রকল্প ঘোষণা, কোটি কোটি মানুষ উপকৃত হবেন",
-    "লোকসভায় বিতর্কিত বিল পাস, বিরোধীদের তীব্র প্রতিবাদ",
-    "ক্রিকেট বিশ্বকাপে ভারতের ঐতিহাসিক জয়, দেশজুড়ে আনন্দ উদযাপন",
-    "বাংলা চলচ্চিত্রে নতুন অধ্যায়, আন্তর্জাতিক পুরস্কার পেল বাংলা ছবি",
-    "প্রযুক্তি খাতে ভারত বিশ্বে চতুর্থ স্থানে, রপ্তানি রেকর্ড",
-    "কলকাতায় ঐতিহ্যবাহী দুর্গাপূজার প্রস্তুতি শুরু, কোটি টাকার বাজেট",
-    "রাজ্যে নতুন বিদ্যুৎ প্রকল্প, ২ লাখ পরিবার পাবে সুবিধা",
-    "ভারত-চীন সীমান্ত উত্তেজনা, কূটনৈতিক আলোচনার উদ্যোগ",
-    "শেয়ার বাজারে ধস, বিনিয়োগকারীদের মাথায় হাত",
-    "সুন্দরবনে নতুন বাঘের সন্ধান, পর্যটকদের উত্তেজনা",
-    "রাজ্যের স্বাস্থ্য পরিষেবায় নতুন উদ্যোগ, বিনামূল্যে চিকিৎসা",
-    "শিক্ষা ব্যবস্থায় বড় পরিবর্তন, নতুন পাঠ্যক্রম চালু",
-  ][i],
-  category: "পশ্চিমবঙ্গ",
-  image: [
-    "https://images.unsplash.com/photo-1580060092295-dbe639fffda3?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1675693303492-9a5bc898bf94?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1682130301125-5b63bbf93241?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1533254012848-644c18f39289?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1513014576558-921f00d80b77?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1624858020896-4a558c5d7042?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1583608563020-9772ff491a8c?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1625401586060-f12be3d7cc57?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1720195343674-e20e1dcfadf5?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1594470117722-de4b9a02ebed?w=600&h=400&fit=crop&auto=format",
-    "https://images.unsplash.com/photo-1635017010130-8b12cbae591d?w=600&h=400&fit=crop&auto=format",
-  ][i],
-  time: `${i + 1} ঘণ্টা আগে`,
-  views: `${Math.floor(Math.random() * 90000 + 10000).toLocaleString("bn-IN")}`,
-  excerpt: "বিস্তারিত তথ্য জানতে সম্পূর্ণ প্রতিবেদনটি পড়ুন। এই সংবাদটি আমাদের বিশেষ সংবাদদাতার পাঠানো প্রতিবেদন থেকে নেওয়া হয়েছে।",
-}));
+
+
 
 export function CategoryPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const meta = CATEGORY_META[slug || "west-bengal"] || CATEGORY_META["west-bengal"];
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("সর্বশেষ");
-  const [page, setPage] = useState(1);
-  const pageSize = 9;
-  const totalPages = Math.ceil(MOCK_ARTICLES.length / pageSize);
-  const articles = MOCK_ARTICLES.slice((page - 1) * pageSize, page * pageSize);
+const { slug } = useParams<{ slug: string }>();
+const meta =
+  CATEGORY_META[slug || "west-bengal"] || CATEGORY_META["west-bengal"];
 
+const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+const [sortBy, setSortBy] = useState("সর্বশেষ");
+const [page, setPage] = useState(1);
+
+const [articles, setArticles] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+
+const pageSize = 9;
+const totalPages = Math.ceil(articles.length / pageSize) || 1;
+
+const paginatedArticles = articles.slice(
+  (page - 1) * pageSize,
+  page * pageSize
+  
+);
+const categoryMap: Record<string, string> = {
+  "west-bengal": "west-bengal",
+  "north-bengal": "north-bengal",
+  "south-bengal": "south-bengal",
+
+  "politics": "politics",
+
+  "sports": "sports",
+  "cricket": "cricket",
+  "football": "football",
+  "other-sports": "other-sports",
+
+  "business": "business",
+  "technology": "technology",
+  "health": "health",
+  "education": "education",
+  "entertainment": "entertainment",
+  "food": "food",
+
+  "india": "india",
+  "world": "world",
+
+  "editorial": "editorial",
+};
+useEffect(() => {
+  const loadNews = async () => {
+    setLoading(true);
+
+    try {
+      const snapshot = await getDocs(collection(db, "news"));
+
+const allNews = snapshot.docs.map((doc) => ({
+  id: doc.id,
+  ...doc.data(),
+}));
+
+const firebaseCategory = categoryMap[slug || ""] || slug;
+
+const filtered = allNews.filter(
+  (item: any) =>
+    item.category?.toLowerCase() === firebaseCategory?.toLowerCase()
+);
+
+console.log("Slug:", slug);
+console.log("Filtered:", filtered);
+
+setArticles(filtered);
+    } catch (error) {
+      console.error(error);
+    }
+
+    setLoading(false);
+  };
+
+  loadNews();
+}, [slug]);
   return (
     <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#121212]">
       {/* Category Header */}
@@ -93,13 +675,13 @@ export function CategoryPage() {
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-8">
           <main>
             {/* Featured Article */}
-            {MOCK_ARTICLES[0] && (
-              <Link to={`/article/${MOCK_ARTICLES[0].id}`} className="group block mb-6 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-all">
+            {articles.length > 0 && (
+              <Link to={`/article/${articles[0].id}`} className="group block mb-6 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-all">
                 <div className="grid grid-cols-1 md:grid-cols-2">
                   <div className="relative aspect-video md:aspect-auto overflow-hidden bg-gray-100">
                     <img
-                      src={MOCK_ARTICLES[0].image}
-                      alt={MOCK_ARTICLES[0].title}
+                      src={articles[0].image}
+                      alt={articles[0].title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <span
@@ -114,17 +696,17 @@ export function CategoryPage() {
                       className="text-gray-900 dark:text-white group-hover:text-red-600 transition-colors mb-3 leading-snug"
                       style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "1.3rem", fontWeight: 700 }}
                     >
-                      {MOCK_ARTICLES[0].title}
+                      {articles[0].title}
                     </h2>
                     <p
                       className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-4"
                       style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
                     >
-                      {MOCK_ARTICLES[0].excerpt}
+                      {articles[0].description}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-gray-400">
-                      <span className="flex items-center gap-1"><Clock size={11} />{MOCK_ARTICLES[0].time}</span>
-                      <span className="flex items-center gap-1"><Eye size={11} />{MOCK_ARTICLES[0].views}</span>
+                      <span className="flex items-center gap-1"><Clock size={11} />{articles[0].time}</span>
+                      <span className="flex items-center gap-1"><Eye size={11} />{articles[0].views}</span>
                     </div>
                   </div>
                 </div>
@@ -168,7 +750,7 @@ export function CategoryPage() {
             {/* Articles Grid/List */}
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-                {articles.map(article => (
+                {paginatedArticles.map((article) => (
                   <Link key={article.id} to={`/article/${article.id}`} className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
                     <div className="relative aspect-video overflow-hidden bg-gray-100">
                       <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -196,7 +778,7 @@ export function CategoryPage() {
               </div>
             ) : (
               <div className="space-y-3 mb-8">
-                {articles.map((article, i) => (
+                {paginatedArticles.map((article) => (
                   <Link key={article.id} to={`/article/${article.id}`} className="group flex gap-4 bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
                     <div className="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden bg-gray-100">
                       <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -209,7 +791,7 @@ export function CategoryPage() {
                         {article.title}
                       </h3>
                       <p className="text-gray-400 text-sm line-clamp-1" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                        {article.excerpt}
+                        {article.description}
                       </p>
                       <div className="flex items-center gap-3 mt-2 text-gray-400 text-xs">
                         <span className="flex items-center gap-1"><Clock size={10} />{article.time}</span>
@@ -261,7 +843,7 @@ export function CategoryPage() {
                 </h3>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {MOCK_ARTICLES.slice(0, 5).map((item, i) => (
+                {articles.slice(0, 5).map((item, i) => (
                   <Link key={item.id} to={`/article/${item.id}`} className="group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <span
                       className="flex-shrink-0 w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center"

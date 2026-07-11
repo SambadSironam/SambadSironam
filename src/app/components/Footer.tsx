@@ -22,19 +22,15 @@ const FOOTER_LINKS = [
       { label: "ছবিতে সংবাদ", href: "/photos" },
       { label: "লাইভ টিভি", href: "/live-tv" },
       { label: "ই-পেপার", href: "/epaper" },
-      { label: "ওয়েব স্টোরি", href: "/web-stories" },
-      { label: "পডকাস্ট", href: "/podcast" },
     ],
   },
   {
     title: "আমাদের সম্পর্কে",
     links: [
-      { label: "আমাদের পরিচয়", href: "/about" },
+      
       { label: "যোগাযোগ করুন", href: "/contact" },
-      { label: "বিজ্ঞাপন দিন", href: "/advertise" },
-      { label: "ক্যারিয়ার", href: "/career" },
-      { label: "গোপনীয়তা নীতি", href: "/privacy" },
-      { label: "শর্তাবলী", href: "/terms" },
+
+      
     ],
   },
 ];

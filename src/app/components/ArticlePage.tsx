@@ -1,5 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import {
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  updateDoc,
+  increment,
+} from "firebase/firestore";
+import { db } from "../../firebase";
 import {
   Clock,
   Eye,
@@ -23,62 +32,78 @@ import {
   FaYoutube
 } from "react-icons/fa6";
 
-const ARTICLE_DATA = {
-  id: "1",
-  category: "ব্রেকিং নিউজ",
-  catColor: "#D71920",
-  catSlug: "breaking",
-  title: "পশ্চিমবঙ্গে ঐতিহাসিক বন্যা পরিস্থিতি, লক্ষাধিক মানুষ বাস্তুচ্যুত",
-  subtitle: "রাজ্যের ১২টি জেলায় জরুরি অবস্থা জারি, সেনাবাহিনী উদ্ধার কাজে নামল। বিভিন্ন নদীর জলস্তর বিপদসীমার উপরে।",
-  heroImage: "https://images.unsplash.com/photo-1580060092295-dbe639fffda3?w=1200&h=700&fit=crop&auto=format",
-  author: { name: "সৌম্যদীপ চট্টোপাধ্যায়", avatar: "", role: "সিনিয়র সংবাদদাতা" },
-  publishedAt: "১৩ জুন ২০২৬, বিকেল ৩:৪৫",
-  updatedAt: "১৩ জুন ২০২৬, সন্ধ্যা ৬:০০",
-  readTime: "৮ মিনিট",
-  views: "১,২৩,৪৫৬",
-  tags: ["বন্যা", "পশ্চিমবঙ্গ", "ত্রাণ", "সেনাবাহিনী", "দুর্যোগ"],
-  content: [
-    {
-      type: "paragraph",
-      text: "পশ্চিমবঙ্গের বিভিন্ন জেলায় অবিরাম বৃষ্টিপাতের কারণে ভয়াবহ বন্যা পরিস্থিতি তৈরি হয়েছে। রাজ্যের ১২টি জেলায় জরুরি অবস্থা জারি করা হয়েছে এবং সেনাবাহিনীকে উদ্ধার কাজে নামানো হয়েছে। প্রায় ১৫ লাখ মানুষ গৃহহীন হয়ে পড়েছেন।",
-    },
-    {
-      type: "paragraph",
-      text: "মুর্শিদাবাদ, মালদা, নদিয়া, বর্ধমান সহ ১২টি জেলায় বন্যার জল ছড়িয়ে পড়েছে। গঙ্গা, পদ্মা, তিস্তা, ময়ূরাক্ষী সহ বিভিন্ন নদীর জলস্তর বিপদসীমার উপরে রয়েছে। আবহাওয়া দফতর আগামী ৪৮ ঘণ্টা ভারী বৃষ্টিপাতের পূর্বাভাস দিয়েছে।",
-    },
-    {
-      type: "pullquote",
-      text: "\"পরিস্থিতি অত্যন্ত গুরুতর। আমরা সর্বাত্মক চেষ্টা করছি যাতে কোনো প্রাণহানি না হয়।\" — মুখ্যমন্ত্রী",
-    },
-    {
-      type: "paragraph",
-      text: "রাজ্য সরকার ইতিমধ্যে ৫০০টি ত্রাণ শিবির খুলেছে এবং সেখানে প্রায় ৩ লাখ মানুষকে আশ্রয় দেওয়া হয়েছে। জাতীয় দুর্যোগ মোকাবেলা বাহিনী (এনডিআরএফ) এবং রাজ্য দুর্যোগ মোকাবেলা বাহিনীর (এসডিআরএফ) ৩০টিরও বেশি দল উদ্ধার কাজে নিয়োজিত রয়েছে।",
-    },
-    {
-      type: "paragraph",
-      text: "কৃষিক্ষেত্রেও ব্যাপক ক্ষতি হয়েছে। প্রায় ২ লাখ হেক্টর জমির ফসল জলের নিচে ডুবে গেছে। কৃষি বিশেষজ্ঞরা বলছেন, এই ক্ষতি সামলাতে কৃষকদের বছরের পর বছর লাগবে।",
-    },
-    {
-      type: "paragraph",
-      text: "কেন্দ্র সরকার ইতিমধ্যে রাজ্যকে ৫০০ কোটি টাকার জরুরি সাহায্য দেওয়ার প্রতিশ্রুতি দিয়েছে। প্রধানমন্ত্রী পরিস্থিতি পর্যালোচনার জন্য উচ্চ পর্যায়ের বৈঠক ডেকেছেন।",
-    },
-  ],
-};
+function getTimeAgo(timestamp: any) {
+  if (!timestamp) return "";
 
-const RELATED_ARTICLES = [
-  { id: "r1", title: "ত্রাণ শিবিরে মানুষের ঢল, প্রশাসনের বিরুদ্ধে অভিযোগ", category: "পশ্চিমবঙ্গ", image: "https://images.unsplash.com/photo-1513014576558-921f00d80b77?w=300&h=200&fit=crop&auto=format", time: "২ ঘণ্টা আগে" },
-  { id: "r2", title: "বন্যা পরিস্থিতিতে বিদ্যুৎ সংযোগ বিচ্ছিন্ন, অন্ধকারে হাজারো পরিবার", category: "পশ্চিমবঙ্গ", image: "https://images.unsplash.com/photo-1624858020896-4a558c5d7042?w=300&h=200&fit=crop&auto=format", time: "৩ ঘণ্টা আগে" },
-  { id: "r3", title: "বন্যা কবলিত এলাকায় স্বাস্থ্য সমস্যা, ডায়রিয়ার প্রকোপ বাড়ছে", category: "স্বাস্থ্য", image: "https://images.unsplash.com/photo-1720195343674-e20e1dcfadf5?w=300&h=200&fit=crop&auto=format", time: "৪ ঘণ্টা আগে" },
-];
+  const date = timestamp.toDate();
+  const now = new Date();
 
-const COMMENTS = [
-  { id: "c1", author: "রাজীব সেন", time: "১ ঘণ্টা আগে", text: "সরকারকে আরও দ্রুত পদক্ষেপ নিতে হবে। বন্যায় ক্ষতিগ্রস্তদের জন্য যথেষ্ট ত্রাণ দেওয়া হচ্ছে না।", likes: 45 },
-  { id: "c2", author: "সুমিতা দাস", time: "২ ঘণ্টা আগে", text: "এই পরিস্থিতিতে সকলের একতাবদ্ধ হওয়া উচিত। আমাদের যতটুকু পারি সাহায্য করতে হবে।", likes: 32 },
-];
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diff < 60) return "এইমাত্র";
+
+  const minutes = Math.floor(diff / 60);
+  if (minutes < 60) return `${minutes} মিনিট আগে`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} ঘণ্টা আগে`;
+
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "গতকাল";
+
+  if (days < 30) return `${days} দিন আগে`;
+
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} মাস আগে`;
+
+  const years = Math.floor(months / 12);
+  return `${years} বছর আগে`;
+}
 
 export function ArticlePage() {
   const { id } = useParams();
-  const article = ARTICLE_DATA;
+  const [article, setArticle] = useState<any>(null);
+  const [relatedNews, setRelatedNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+  const loadArticle = async () => {
+    if (!id) return;
+
+    try {
+      const docRef = doc(db, "news", id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        await updateDoc(docRef, {
+  views: increment(1),
+});
+        setArticle({
+          id: docSnap.id,
+          ...docSnap.data(),
+        });
+        const relatedSnapshot = await getDocs(collection(db, "news"));
+
+const related = relatedSnapshot.docs
+  .map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
+  .filter((item: any) => item.id !== id)
+  .slice(0, 6);
+
+setRelatedNews(related);
+      } else {
+        console.log("Article not found");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadArticle();
+}, [id]);
   const [fontSize, setFontSize] = useState(16);
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -90,7 +115,21 @@ export function ArticlePage() {
     setLiked(!liked);
     setLikeCount(c => liked ? c - 1 : c + 1);
   };
+  if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
 
+if (!article) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Article not found.
+    </div>
+  );
+}
   return (
     <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#121212]">
       {/* Breadcrumb */}
@@ -99,7 +138,7 @@ export function ArticlePage() {
           <div className="flex items-center gap-1 text-xs text-gray-400" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
             <Link to="/" className="hover:text-red-600 transition-colors">হোম</Link>
             <ChevronRight size={12} />
-            <Link to={`/category/${article.catSlug}`} className="hover:text-red-600 transition-colors">{article.category}</Link>
+            <Link to={`/category/${article.category}`} className="hover:text-red-600 transition-colors">{article.category}</Link>
             <ChevronRight size={12} />
             <span className="text-gray-600 dark:text-gray-400 line-clamp-1">{article.title.slice(0, 40)}...</span>
           </div>
@@ -116,7 +155,7 @@ export function ArticlePage() {
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span
                     className="text-white text-xs px-3 py-1 rounded-full font-bold"
-                    style={{ backgroundColor: article.catColor, fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                    style={{ backgroundColor: "#D71920" }}
                   >
                     {article.category}
                   </span>
@@ -136,7 +175,7 @@ export function ArticlePage() {
                   className="text-gray-600 dark:text-gray-400 leading-relaxed"
                   style={{ fontFamily: "'Noto Sans Bengali', sans-serif", fontSize: "1.05rem" }}
                 >
-                  {article.subtitle}
+                  {article.description}
                 </p>
 
                 {/* Author & Meta */}
@@ -147,9 +186,9 @@ export function ArticlePage() {
                     </div>
                     <div>
                       <div className="font-bold text-gray-800 dark:text-gray-200 text-sm" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                        {article.author.name}
+                        {article.author}
                       </div>
-                      <div className="text-gray-400 text-xs">{article.author.role}</div>
+                      <div className="text-gray-400 text-xs">স্টাফ রিপোর্টার</div>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
@@ -196,7 +235,7 @@ export function ArticlePage() {
               {/* Hero Image */}
               <div className="relative">
                 <img
-                  src={article.heroImage}
+                  src={article.image}
                   alt={article.title}
                   className="w-full object-cover"
                   style={{ maxHeight: "500px" }}
@@ -208,52 +247,32 @@ export function ArticlePage() {
 
               {/* Article Body */}
               <div className="px-6 py-6">
-                {article.content.map((block, i) => {
-                  if (block.type === "paragraph") {
-                    return (
-                      <p
-                        key={i}
-                        className="text-gray-700 dark:text-gray-300 mb-5 leading-loose"
-                        style={{
-                          fontFamily: "'Noto Sans Bengali', sans-serif",
-                          fontSize: `${fontSize}px`,
-                        }}
-                      >
-                        {block.text}
-                      </p>
-                    );
-                  }
-                  if (block.type === "pullquote") {
-                    return (
-                      <blockquote
-                        key={i}
-                        className="border-l-4 border-red-600 pl-5 my-8 italic text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-900/10 py-4 pr-4 rounded-r-xl"
-                        style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: `${fontSize + 2}px` }}
-                      >
-                        {block.text}
-                      </blockquote>
-                    );
-                  }
-                  return null;
-                })}
-
+                <p
+  className="text-gray-700 dark:text-gray-300 leading-loose whitespace-pre-wrap"
+  style={{
+    fontFamily: "'Noto Sans Bengali', sans-serif",
+    fontSize: `${fontSize}px`,
+  }}
+>
+  {article.content}
+</p>
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
-                  {article.tags.map(tag => (
-                    <Link
-                      key={tag}
-                      to={`/tag/${tag}`}
-                      className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-sm px-3 py-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors"
-                      style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-                    >
-                      #{tag}
-                    </Link>
-                  ))}
+                  {article.category && (
+  <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
+    <span
+      className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
+      style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+    >
+      #{article.category}
+    </span>
+  </div>
+)}
                 </div>
 
                 {/* Updated at */}
                 <p className="text-gray-400 text-xs mt-4" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                  সর্বশেষ আপডেট: {article.updatedAt}
+                  সর্বশেষ আপডেট: {getTimeAgo(article.createdAt)}
                 </p>
               </div>
 
@@ -266,8 +285,8 @@ export function ArticlePage() {
                   <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
                     <FaFacebookF size={15} /> ফেসবুক
                   </button>
-                  <button className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-600 transition-colors">
-                    <FaInstagram size={15} /> টুইটার
+                  <button className="flex items-center gap-2 bg-pink-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-pink-600 transition-colors">
+                    <FaInstagram size={15} /> ইন্সটাগ্রাম
                   </button>
                   <button className="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     <Link2 size={15} /> লিংক কপি
@@ -320,29 +339,7 @@ export function ArticlePage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                {COMMENTS.map(comment => (
-                  <div key={comment.id} className="flex gap-3">
-                    <div className="w-9 h-9 bg-red-100 dark:bg-red-900/30 rounded-full flex-shrink-0 flex items-center justify-center">
-                      <User size={14} className="text-red-600" />
-                    </div>
-                    <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm text-gray-800 dark:text-gray-200" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                          {comment.author}
-                        </span>
-                        <span className="text-gray-400 text-xs">{comment.time}</span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                        {comment.text}
-                      </p>
-                      <button className="flex items-center gap-1 text-gray-400 hover:text-red-600 transition-colors text-xs mt-2">
-                        <ThumbsUp size={11} /> {comment.likes}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* Comments will be loaded from Firestore when available */}
             </div>
 
             {/* Related Articles */}
@@ -354,7 +351,7 @@ export function ArticlePage() {
                 সম্পর্কিত সংবাদ
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {RELATED_ARTICLES.map(rel => (
+                {relatedNews.map((rel: any) => (
                   <Link key={rel.id} to={`/article/${rel.id}`} className="group">
                     <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 mb-2">
                       <img src={rel.image} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -369,7 +366,7 @@ export function ArticlePage() {
                       {rel.title}
                     </p>
                     <span className="text-gray-400 text-xs mt-1 flex items-center gap-1">
-                      <Clock size={10} /> {rel.time}
+                      <Clock size={10} /> Just now
                     </span>
                   </Link>
                 ))}
@@ -390,7 +387,7 @@ export function ArticlePage() {
                 </h3>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {RELATED_ARTICLES.map(item => (
+                {relatedNews.map((item: any) => (
                   <Link key={item.id} to={`/article/${item.id}`} className="group flex gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <img src={item.image} alt={item.title} className="w-20 h-14 object-cover rounded-lg flex-shrink-0" />
                     <p
