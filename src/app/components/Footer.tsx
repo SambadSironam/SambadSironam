@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, ArrowUp } from "lucide-react";
 import logoImg from "../../imports/logo.png";
-import { FaYoutube, FaApple, FaGooglePlay } from "react-icons/fa6";
+import { FaYoutube, FaApple, FaGooglePlay, FaFacebookF, FaInstagram } from "react-icons/fa6";
 
 const FOOTER_LINKS = [
   {
@@ -84,23 +84,30 @@ export function Footer() {
 
             {/* Social */}
             <div className="flex items-center gap-3 mt-5">
-              {[
-                { label: "f", color: "#1877F2", title: "Facebook" }
-              ].map(s => (
-                <a
-                  key={s.title}
-                  href="#"
-                  title={s.title}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold hover:scale-110 transition-transform"
-                  style={{ backgroundColor: s.color }}
-                >
-                  {s.label}
-                </a>
-              ))}
               <a
-                href="#"
+                href="https://www.facebook.com/sambadsironam"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Facebook"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-[#1877F2] text-white hover:scale-110 transition-transform"
+              >
+                <FaFacebookF size={14} />
+              </a>
+              <a
+                href="https://instagram.com/sambadsironam"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Instagram"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white hover:scale-110 transition-transform"
+              >
+                <FaInstagram size={14} />
+              </a>
+              <a
+                href="https://www.youtube.com/@sambadsironamdigital"
+                target="_blank"
+                rel="noopener noreferrer"
                 title="YouTube"
-                className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
               >
                 <FaYoutube size={14} />
               </a>
