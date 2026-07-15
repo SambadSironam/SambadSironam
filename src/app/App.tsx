@@ -95,6 +95,60 @@ export default function App() {
     if (saved === "true") setDarkMode(true);
   }, []);
 
+  useEffect(() => {
+    // Disable right click context menu (optional, but standard for copy protection)
+    const handleContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable ||
+        target.closest(".selectable")
+      ) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    // Disable copy
+    const handleCopy = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable ||
+        target.closest(".selectable")
+      ) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    // Disable cut
+    const handleCut = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable ||
+        target.closest(".selectable")
+      ) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("copy", handleCopy);
+    document.addEventListener("cut", handleCut);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopy);
+      document.removeEventListener("cut", handleCut);
+    };
+  }, []);
+
   const handleDarkMode = (v: boolean) => {
     setDarkMode(v);
     localStorage.setItem("sambad-dark-mode", String(v));
@@ -102,7 +156,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-  <AppLayout darkMode={darkMode} setDarkMode={handleDarkMode} />
-</BrowserRouter>
+      <AppLayout darkMode={darkMode} setDarkMode={handleDarkMode} />
+    </BrowserRouter>
   );
 }
