@@ -1,5 +1,5 @@
 
-  # Upload logo
+  # Sambad Sironam
 
   This is a code bundle for Upload logo. The original project is available at https://www.figma.com/design/riiOWSwyXCfOfFIEqO3lnl/Upload-logo.
 
