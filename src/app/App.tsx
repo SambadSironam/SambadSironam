@@ -12,6 +12,7 @@ import LiveTV from "./components/LiveTV";
 import EPaper from "./components/Epaper";
 import ContactPage from "./components/Contact";
 import VideosPage from "./components/VideosPage";
+import VerifyID from "./components/VerifyID";
 import SectionPage from "./components/SectionPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsConditions from "./components/TermsConditions";
@@ -77,6 +78,7 @@ function AppLayout({ darkMode, setDarkMode }: { darkMode: boolean; setDarkMode: 
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/section/:slug" element={<SectionPage />} />
+          <Route path="/verify-id" element={<VerifyID />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/videos" element={<VideosPage />} />

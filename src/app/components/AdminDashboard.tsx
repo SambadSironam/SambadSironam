@@ -9,6 +9,7 @@ import {
   serverTimestamp,
   orderBy,
   query,
+  setDoc,
 } from "firebase/firestore";
 import {
   ref,
@@ -47,6 +48,111 @@ export function AdminDashboard() {
   const [loadingArticles, setLoadingArticles] = useState(false);
   const [visibleCount, setVisibleCount] = useState(3);
 
+  // Manage Workers state
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [loadingWorkers, setLoadingWorkers] = useState(false);
+  const [workerIdInput, setWorkerIdInput] = useState("");
+  const [workerName, setWorkerName] = useState("");
+  const [workerDesignation, setWorkerDesignation] = useState("");
+  const [workerPhone, setWorkerPhone] = useState("");
+  const [workerEmail, setWorkerEmail] = useState("");
+  const [workerBloodGroup, setWorkerBloodGroup] = useState("");
+  const [workerValidUntil, setWorkerValidUntil] = useState("");
+  const [workerPhoto, setWorkerPhoto] = useState<File | null>(null);
+  const [workerStatus, setWorkerStatus] = useState("Active");
+  const [uploadingWorker, setUploadingWorker] = useState(false);
+  const [selectedQrWorker, setSelectedQrWorker] = useState<any | null>(null);
+
+  const fetchWorkers = async () => {
+    setLoadingWorkers(true);
+    try {
+      const q = query(collection(db, "workers"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      const list = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setWorkers(list);
+    } catch (error) {
+      console.error("Error fetching workers:", error);
+    } finally {
+      setLoadingWorkers(false);
+    }
+  };
+
+  const handleWorkerUpload = async () => {
+    try {
+      if (!workerIdInput.trim()) {
+        alert("Please enter Worker ID (e.g. SS-001).");
+        return;
+      }
+      if (!workerName.trim()) {
+        alert("Please enter worker name.");
+        return;
+      }
+      if (!workerDesignation.trim()) {
+        alert("Please enter designation.");
+        return;
+      }
+
+      setUploadingWorker(true);
+
+      let photoUrl = "";
+      if (workerPhoto) {
+        const photoRef = ref(storage, `workers/${workerIdInput.trim()}-${Date.now()}-${workerPhoto.name}`);
+        await uploadBytes(photoRef, workerPhoto);
+        photoUrl = await getDownloadURL(photoRef);
+      }
+
+      await setDoc(doc(db, "workers", workerIdInput.trim()), {
+        name: workerName,
+        designation: workerDesignation,
+        phone: workerPhone,
+        email: workerEmail,
+        bloodGroup: workerBloodGroup,
+        validUntil: workerValidUntil,
+        photo: photoUrl,
+        status: workerStatus,
+        createdAt: serverTimestamp(),
+      });
+
+      alert("Worker profile registered successfully!");
+
+      setWorkerIdInput("");
+      setWorkerName("");
+      setWorkerDesignation("");
+      setWorkerPhone("");
+      setWorkerEmail("");
+      setWorkerBloodGroup("");
+      setWorkerValidUntil("");
+      setWorkerPhoto(null);
+      setWorkerStatus("Active");
+
+      fetchWorkers();
+    } catch (error: any) {
+      console.error("Error registering worker:", error);
+      alert(error.message);
+    } finally {
+      setUploadingWorker(false);
+    }
+  };
+
+  const handleWorkerDelete = async (id: string) => {
+    if (window.confirm("আপনি কি নিশ্চিতভাবে এই কর্মীর আইডি মুছে ফেলতে চান?")) {
+      try {
+         await deleteDoc(doc(db, "workers", id));
+         alert("কর্মী সফলভাবে মুছে ফেলা হয়েছে।");
+         fetchWorkers();
+         if (selectedQrWorker?.id === id) {
+           setSelectedQrWorker(null);
+         }
+      } catch (error: any) {
+         console.error("Error deleting worker:", error);
+         alert("Failed to delete worker: " + error.message);
+      }
+    }
+  };
+
   const fetchArticles = async () => {
     setLoadingArticles(true);
     try {
@@ -79,6 +185,7 @@ export function AdminDashboard() {
         navigate("/admin", { replace: true });
       } else {
         fetchArticles();
+        fetchWorkers();
       }
     });
 
@@ -650,8 +757,396 @@ export function AdminDashboard() {
           fontWeight: "bold",
         }}
       >
-        {uploadingPaper ? "Uploading..." : "📄 Upload E-Paper"}
       </button>
+
+      <hr style={{ margin: "40px 0" }} />
+
+      {/* Workers Management Section */}
+      <h2
+        style={{
+          marginBottom: "20px",
+          color: "#0B1F3A",
+          fontWeight: "bold",
+        }}
+      >
+        👥 প্রতিনিধি পরিচালনা (Manage Workers/Representatives)
+      </h2>
+
+      <div
+        style={{
+          background: "#f8f9fa",
+          padding: "20px",
+          borderRadius: "8px",
+          border: "1px solid #e9ecef",
+          marginBottom: "30px",
+        }}
+      >
+        <h3 style={{ fontSize: "1.1rem", fontWeight: "bold", marginBottom: "15px", color: "#495057" }}>
+          👤 নতুন প্রতিনিধি যোগ করুন
+        </h3>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>Worker ID (যেমন: SS-001)</label>
+            <input
+              type="text"
+              placeholder="SS-001"
+              value={workerIdInput}
+              onChange={(e) => setWorkerIdInput(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>পূর্ণ নাম (Full Name)</label>
+            <input
+              type="text"
+              placeholder="প্রতিনিধির নাম লিখুন"
+              value={workerName}
+              onChange={(e) => setWorkerName(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>পদবী (Designation)</label>
+            <input
+              type="text"
+              placeholder="যেমন: সাংবাদিক, ভিডিওগ্রাফার"
+              value={workerDesignation}
+              onChange={(e) => setWorkerDesignation(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>ফোন নম্বর</label>
+            <input
+              type="text"
+              placeholder="+91-XXXXXXXXXX"
+              value={workerPhone}
+              onChange={(e) => setWorkerPhone(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>ইমেইল ঠিকানা</label>
+            <input
+              type="email"
+              placeholder="worker@email.com"
+              value={workerEmail}
+              onChange={(e) => setWorkerEmail(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>রক্তের গ্রুপ (Blood Group)</label>
+            <input
+              type="text"
+              placeholder="A+, O-, B+ ইত্যাদি"
+              value={workerBloodGroup}
+              onChange={(e) => setWorkerBloodGroup(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>মেয়াদ শেষ (Valid Until)</label>
+            <input
+              type="text"
+              placeholder="যেমন: December 2027"
+              value={workerValidUntil}
+              onChange={(e) => setWorkerValidUntil(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>স্ট্যাটাস (Status)</label>
+            <select
+              value={workerStatus}
+              onChange={(e) => setWorkerStatus(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            >
+              <option value="Active">Active (সক্রিয়)</option>
+              <option value="Inactive">Inactive (অক্রিয়)</option>
+              <option value="Suspended">Suspended (স্থগিত)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>প্রতিনিধির ছবি (Photo)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                setWorkerPhoto(e.target.files[0]);
+              }
+            }}
+          />
+        </div>
+
+        <button
+          onClick={handleWorkerUpload}
+          disabled={uploadingWorker}
+          style={{
+            background: "#28a745",
+            color: "#fff",
+            border: "none",
+            padding: "12px 20px",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "0.95rem",
+            fontWeight: "bold",
+            width: "100%",
+          }}
+        >
+          {uploadingWorker ? "Saving Representative..." : "👥 প্রতিনিধি আইডি যুক্ত করুন"}
+        </button>
+      </div>
+
+      {/* Workers List Section */}
+      <h3 style={{ fontSize: "1.1rem", fontWeight: "bold", marginBottom: "15px", color: "#0B1F3A" }}>
+        📁 নিবন্ধিত প্রতিনিধি তালিকা ({workers.length})
+      </h3>
+
+      {loadingWorkers ? (
+        <p>লোড হচ্ছে...</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {workers.map((w) => (
+            <div
+              key={w.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "15px",
+                background: "#f8f9fa",
+                borderRadius: "10px",
+                border: "1px solid #e9ecef",
+                gap: "15px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "15px", flex: 1, minWidth: 0 }}>
+                <div style={{ width: "50px", height: "50px", borderRadius: "50%", overflow: "hidden", background: "#dee2e6", flexShrink: 0 }}>
+                  {w.photo ? (
+                    <img src={w.photo} alt={w.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", justify: "center", height: "100%", color: "#6c757d", fontSize: "0.8rem" }}>No Pic</div>
+                  )}
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", color: "#212529" }}>{w.name}</h4>
+                  <div style={{ fontSize: "0.8rem", color: "#495057", marginTop: "2px" }}>
+                    ID: <strong>{w.id}</strong> | Designation: <strong>{w.designation}</strong>
+                  </div>
+                  <div style={{ marginTop: "4px" }}>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontWeight: "bold",
+                        background: w.status === "Active" ? "#d4edda" : w.status === "Suspended" ? "#f8d7da" : "#fff3cd",
+                        color: w.status === "Active" ? "#155724" : w.status === "Suspended" ? "#721c24" : "#856404",
+                      }}
+                    >
+                      {w.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", flexShrink: 0 }}>
+                <button
+                  onClick={() => setSelectedQrWorker(w)}
+                  style={{
+                    background: "#17a2b8",
+                    color: "#fff",
+                    border: "none",
+                    padding: "6px 12px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  QR কোড
+                </button>
+                <button
+                  onClick={() => handleWorkerDelete(w.id)}
+                  style={{
+                    background: "#dc3545",
+                    color: "#fff",
+                    border: "none",
+                    padding: "6px 12px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {workers.length === 0 && <p style={{ color: "#6c757d" }}>কোনো কর্মী পাওয়া যায়নি।</p>}
+        </div>
+      )}
+
+      {/* QR Code Modal / Drawer */}
+      {selectedQrWorker && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.6)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "25px",
+              borderRadius: "16px",
+              maxWidth: "400px",
+              width: "100%",
+              textAlign: "center",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h3 style={{ margin: "0 0 10px 0", color: "#0B1F3A", fontWeight: "bold" }}>
+              প্রতিনিধি QR কোড
+            </h3>
+            <p style={{ margin: "0 0 20px 0", fontSize: "0.85rem", color: "#6c757d" }}>
+              আইডি কার্ডে প্রিন্ট করার জন্য নিচে দেওয়া QR কোডটি স্ক্যান অথবা ডাউনলোড করুন।
+            </p>
+
+            <div
+              style={{
+                display: "inline-block",
+                padding: "10px",
+                border: "2px solid #e9ecef",
+                borderRadius: "12px",
+                background: "#fff",
+                marginBottom: "20px",
+              }}
+            >
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                  window.location.origin + "/verify-id?id=" + selectedQrWorker.id
+                )}`}
+                alt="Representative Verification QR Code"
+                style={{ display: "block", width: "200px", height: "200px" }}
+              />
+            </div>
+
+            <div style={{ textAlign: "left", marginBottom: "20px", fontSize: "0.8rem", background: "#f8f9fa", padding: "10px", borderRadius: "8px", border: "1px solid #e9ecef" }}>
+              <div><strong>নাম:</strong> {selectedQrWorker.name}</div>
+              <div><strong>আইডি:</strong> {selectedQrWorker.id}</div>
+              <div style={{ wordBreak: "break-all", marginTop: "5px" }}>
+                <strong>লিঙ্ক:</strong> <span style={{ color: "#0d6efd" }}>{window.location.origin + "/verify-id?id=" + selectedQrWorker.id}</span>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <a
+                href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(
+                  window.location.origin + "/verify-id?id=" + selectedQrWorker.id
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  background: "#28a745",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                  fontSize: "0.9rem",
+                }}
+              >
+                ডাউনলোড করুন (500x500)
+              </a>
+              <button
+                onClick={() => setSelectedQrWorker(null)}
+                style={{
+                  flex: 1,
+                  background: "#6c757d",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                }}
+              >
+                বন্ধ করুন (Close)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
