@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Clock, Eye, ChevronRight, TrendingUp, Filter, Grid, List } from "lucide-react";
+import { Eye, ChevronRight, TrendingUp, Filter, Grid, List } from "lucide-react";
 import {
   collection,
   getDocs,
@@ -623,12 +623,18 @@ const allNews = snapshot.docs.map((doc) => ({
   ...doc.data(),
 }));
 
-const firebaseCategory = categoryMap[slug || ""] || slug;
+const firebaseCategory = (categoryMap[slug || ""] || slug)?.toLowerCase();
 
-const filtered = allNews.filter(
-  (item: any) =>
-    item.category?.toLowerCase() === firebaseCategory?.toLowerCase()
-);
+const filtered = allNews.filter((item: any) => {
+  const itemCat = item.category?.toLowerCase();
+  if (firebaseCategory === "sports") {
+    return ["sports", "cricket", "football", "other-sports"].includes(itemCat);
+  }
+  if (firebaseCategory === "west-bengal") {
+    return ["west-bengal", "north-bengal", "south-bengal"].includes(itemCat);
+  }
+  return itemCat === firebaseCategory;
+});
 
 console.log("Slug:", slug);
 console.log("Filtered:", filtered);
@@ -705,8 +711,7 @@ setArticles(filtered);
                       {articles[0].description}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-gray-400">
-                      <span className="flex items-center gap-1"><Clock size={11} />{articles[0].time}</span>
-                      <span className="flex items-center gap-1"><Eye size={11} />{articles[0].views}</span>
+                      <span className="flex items-center gap-1"><Eye size={11} />{articles[0].views} Views</span>
                     </div>
                   </div>
                 </div>
@@ -769,8 +774,7 @@ setArticles(filtered);
                         {article.title}
                       </h3>
                       <div className="flex items-center gap-3 mt-3 text-gray-400 text-xs">
-                        <span className="flex items-center gap-1"><Clock size={10} />{article.time}</span>
-                        <span className="flex items-center gap-1"><Eye size={10} />{article.views}</span>
+                        <span className="flex items-center gap-1"><Eye size={10} />{article.views} Views</span>
                       </div>
                     </div>
                   </Link>
@@ -794,8 +798,7 @@ setArticles(filtered);
                         {article.description}
                       </p>
                       <div className="flex items-center gap-3 mt-2 text-gray-400 text-xs">
-                        <span className="flex items-center gap-1"><Clock size={10} />{article.time}</span>
-                        <span className="flex items-center gap-1"><Eye size={10} />{article.views}</span>
+                        <span className="flex items-center gap-1"><Eye size={10} />{article.views} Views</span>
                       </div>
                     </div>
                   </Link>

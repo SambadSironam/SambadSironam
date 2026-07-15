@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { ArrowLeft, Clock, Eye, ChevronRight } from "lucide-react";
+import { ArrowLeft, Eye, ChevronRight } from "lucide-react";
 import { db } from "../../firebase";
 
 const SECTION_META: Record<string, { title: string; description: string; color: string }> = {
@@ -156,9 +156,6 @@ export default function SectionPage() {
                     {item.subtitle || item.description || "আরও পড়ুন"}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} /> {getTimeAgo(item.createdAt)}
-                    </span>
                     <span className="flex items-center gap-1">
                       <Eye size={12} /> {item.views || 0} Views
                     </span>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Mail,
   Phone,
@@ -11,6 +12,40 @@ import {
 } from "react-icons/fa";
 
 export default function ContactPage() {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+
+  const handleNewsletterSubscribe = async () => {
+    if (!newsletterEmail.trim()) {
+      alert("অনুগ্রহ করে আপনার ইমেইল ঠিকানা লিখুন।");
+      return;
+    }
+
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/sambadsironam2002@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          email: newsletterEmail,
+          _subject: "New Newsletter Subscriber!",
+          _message: `A new user has subscribed to the newsletter: ${newsletterEmail}`
+        })
+      });
+
+      if (response.ok) {
+        alert("সাবস্ক্রাইব করার জন্য ধন্যবাদ! আপনার ইমেইল ইনবক্স চেক করুন এবং সাবস্ক্রিপশন নিশ্চিত করুন।");
+        setNewsletterEmail("");
+      } else {
+        throw new Error("Failed to subscribe");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("দুঃখিত, সাবস্ক্রাইব করা সম্ভব হয়নি। অনুগ্রহ করে পরে আবার চেষ্টা করুন।");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f7f3] dark:bg-[#111827]">
 
@@ -162,6 +197,8 @@ export default function ContactPage() {
 
       <input
         type="email"
+        value={newsletterEmail}
+        onChange={(e) => setNewsletterEmail(e.target.value)}
         placeholder="আপনার ইমেইল ঠিকানা লিখুন"
         className="
           w-full
@@ -186,6 +223,7 @@ export default function ContactPage() {
     </div>
 
     <button
+      onClick={handleNewsletterSubscribe}
       className="
         bg-red-600
         hover:bg-red-700

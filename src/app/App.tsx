@@ -13,6 +13,8 @@ import EPaper from "./components/Epaper";
 import ContactPage from "./components/Contact";
 import VideosPage from "./components/VideosPage";
 import SectionPage from "./components/SectionPage";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsConditions from "./components/TermsConditions";
 
 function SearchPage() {
   return (
@@ -72,6 +74,8 @@ function AppLayout({ darkMode, setDarkMode }: { darkMode: boolean; setDarkMode: 
           <Route path="/search" element={<SearchPage />} />
           <Route path="/live-tv" element={<LiveTV />} />
           <Route path="/epaper" element={<EPaper />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsConditions />} />
           <Route path="/section/:slug" element={<SectionPage />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/contact" element={<ContactPage />} />

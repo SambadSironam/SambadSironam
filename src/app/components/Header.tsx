@@ -27,7 +27,6 @@ import {
   Newspaper,
   Mic,
   Camera,
-  Bookmark,
   TrendingUp,
   Zap,
   Radio,
@@ -39,6 +38,13 @@ import {
 } from "react-icons/fa6";
 
 import logo from "../../imports/logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "./ui/dropdown-menu";
 
 const NAV_ITEMS = [
   { label: "হোম", href: "/", children: [] },
@@ -71,17 +77,10 @@ const NAV_ITEMS = [
   { label: "স্বাস্থ্য", href: "/category/health", children: [] },
   { label: "শিক্ষা", href: "/category/education", children: [] },
   { label: "ব্যবসা", href: "/category/business", children: [] },
-  { label: "ভ্রমণ", href: "/category/travel", children: [] },
   { label: "জ্যোতিষ", href: "/category/astrology", children: [] },
-  { label: "লাইভ টিভি", href: "/live-tv", children: [] },
+  { label: "এক্সক্লুসিভ", href: "/category/exclusive", children: [] },
   { label: "ই-পেপার", href: "/epaper", children: [] },
-  {
-  label: "সংবাদ ভিডিও",
-  href: "https://www.youtube.com/@sambadsironamdigital",
-  external: true,
-  children: [],
-},
-  { label: "রান্না", href: "/category/food", children: [] },
+  { label: "সংবাদ ভিডিও", href: "https://www.youtube.com/@sambadsironamdigital", external: true, children: [], },
   { label: "সম্পাদকীয়", href: "/category/editorial", children: [] },
   { label: "যোগাযোগ করুন", href: "/contact", children: [] },
 ];
@@ -95,12 +94,33 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [breakingItems, setBreakingItems] = useState<string[]>([]);
   const [tickerIndex, setTickerIndex] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  const handleMouseEnter = (label: string, hasChildren: boolean) => {
+    if (window.innerWidth >= 1280 && hasChildren) { // xl breakpoint
+      setOpenMenu(label);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (window.innerWidth >= 1280) {
+      setOpenMenu(null);
+    }
+  };
+
+  const handleTriggerClick = (e: React.MouseEvent, label: string, hasChildren: boolean) => {
+    if (hasChildren) {
+      e.preventDefault();
+      e.stopPropagation();
+      setOpenMenu(openMenu === label ? null : label);
+    }
+  };
 
   useEffect(() => {
     const loadBreakingNews = async () => {
@@ -158,26 +178,26 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
-useEffect(() => {
-  const timer = setInterval(() => {
-    setCurrentTime(new Date());
-  }, 1000);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-  return () => clearInterval(timer);
-}, []);
+    return () => clearInterval(timer);
+  }, []);
 
-const today = currentTime.toLocaleDateString("bn-IN", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
+  const today = currentTime.toLocaleDateString("bn-IN", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
-const time = currentTime.toLocaleTimeString("bn-IN", {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-});
+  const time = currentTime.toLocaleTimeString("bn-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
   return (
     <>
@@ -212,222 +232,239 @@ const time = currentTime.toLocaleTimeString("bn-IN", {
 
       {/* Main Header */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-lg" : ""}`}
+        className={`sticky top-0 z-[999] overflow-visible transition-all duration-300 ${scrolled ? "shadow-lg" : ""}`}
         style={{ backgroundColor: darkMode ? "#242377" : "#242377" }}
       >
         <div className="relative flex items-center justify-between py-3 min-h-[100px]">
 
-  {/* Left Section */}
-  <div className="flex items-center gap-2 sm:gap-3 z-5 px-2 sm:px-4 lg:px-8">
+          {/* Left Section */}
+          <div className="flex items-center gap-1.5 sm:gap-3 z-5 px-2 sm:px-4 lg:px-6">
 
-    <Link
-      to="/live-tv"
-      className="hidden lg:flex items-center gap-1 text-red-400 animate-pulse font-semibold hover:text-yellow-400 transition-colors"
-    >
-      <Radio size={16} />
-      <span>লাইভ টিভি</span>
-    </Link>
+            <Link
+              to="/live-tv"
+              className="flex items-center gap-1 lg:gap-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] lg:text-xs px-2 lg:px-3 py-1 lg:py-1.5 rounded-full transition-all duration-300 font-medium animate-pulse whitespace-nowrap shadow-sm hover:shadow-md cursor-pointer"
+              style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+            >
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              <Radio size={12} className="lg:size-[14px]" />
+              <span className="hidden lg:inline">লাইভ টিভি</span>
+            </Link>
 
-    <Link
-      to="/live-tv"
-      className="flex lg:hidden items-center text-red-400 animate-pulse hover:text-yellow-400 transition-colors"
-    >
-      <Radio size={16} />
-    </Link>
+            <Link
+              to="/epaper"
+              className="flex items-center gap-1 lg:gap-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] lg:text-xs px-2 lg:px-3 py-1 lg:py-1.5 rounded-full transition-all duration-300 font-medium animate-pulse whitespace-nowrap shadow-sm hover:shadow-md cursor-pointer"
+              style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+            >
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              <Newspaper size={12} className="lg:size-[14px]" />
+              <span className="hidden lg:inline">ই-পেপার</span>
+            </Link>
 
-    <Link
-      to="/epaper"
-      className="hidden lg:flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors"
-    >
-      <Newspaper size={16} />
-      <span>ই-পেপার</span>
-    </Link>
+          </div>
 
-    <Link
-      to="/epaper"
-      className="flex lg:hidden items-center text-gray-300 hover:text-yellow-400 transition-colors"
-    >
-      <Newspaper size={16} />
-    </Link>
+          {/* EXACT CENTER LOGO */}
+          <Link
+            to="/"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center px-2 z-0"
+          >
+            <img
+              src={logo}
+              alt="Sambad Sironam"
+              className="absolute right-full mr-2 md:mr-3 lg:mr-4 h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-16 lg:w-16 rounded-lg sm:rounded-lg md:rounded-xl object-contain flex-shrink-0"
+            />
 
-  </div>
+            <div className="flex flex-col items-center">
+              <h1
+                className="text-white font-bold leading-tight"
+                style={{
+                  fontFamily: "'Noto Serif Bengali', serif",
+                  fontSize: "clamp(1rem, 4vw, 3rem)",
+                }}
+              >
+                সংবাদ শিরোনাম
+              </h1>
 
-  {/* EXACT CENTER LOGO */}
-  <Link
-    to="/"
-    className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center px-2 z-0"
-  >
+              <p
+                className="mt-0.5 sm:mt-1 text-yellow-300 tracking-wide font-medium text-center whitespace-nowrap"
+                style={{
+                  fontFamily: "'Noto Sans Bengali', sans-serif",
+                  fontSize: "clamp(0.45rem, 1.2vw, 0.85rem)",
+                  lineHeight: 1.1,
+                }}
+              >
+                মাথা উঁচু করে এগিয়ে চলার শপথ
+              </p>
+            </div>
+          </Link>
 
-    <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
+          {/* Right Section - Far Right */}
+          <div className="flex items-center gap-3 xl:gap-5 z-10 ml-auto pr-2 sm:pr-4 lg:pr-6">
 
-      <img
-        src={logo}
-        alt="Sambad Sironam"
-        className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-16 lg:w-16 rounded-lg sm:rounded-lg md:rounded-xl object-contain flex-shrink-0"
-      />
+            <div className="hidden xl:flex items-center gap-3">
+              <a
+                href="https://www.youtube.com/@sambadsironamdigital"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-red-400 hover:text-gray-400 transition-colors"
+              >
+                <FaYoutube size={22} />
+              </a>
 
-      <h1
-        className="text-white font-bold leading-tight"
-        style={{
-          fontFamily: "'Noto Serif Bengali', serif",
-          fontSize: "clamp(1rem, 4vw, 3rem)",
-        }}
-      >
-        সংবাদ শিরোনাম
-      </h1>
+              <a
+                href="https://www.facebook.com/sambadsironam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-gray-400 transition-colors"
+              >
+                <FaFacebookF size={18} />
+              </a>
 
-    </div>
+              <a
+                href="https://instagram.com/sambadsironam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-400 hover:text-gray-400 transition-colors"
+              >
+                <FaInstagram size={18} />
+              </a>
+            </div>
 
-    <p
-      className="mt-1 sm:mt-1.5 md:mt-2 text-yellow-300 tracking-wide font-medium text-center px-2"
-      style={{
-        fontFamily: "'Noto Sans Bengali', sans-serif",
-        fontSize: "clamp(0.5rem, 1.4vw, 0.95rem)",
-        lineHeight: 1.2,
-      }}
-    >
-      মাথা উঁচু করে এগিয়ে চলার শপথ
-    </p>
+            <div className="flex xl:hidden items-center gap-2">
+              <a
+                href="https://www.youtube.com/@sambadsironamdigital"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-red-400 hover:text-gray-400 transition-colors"
+              >
+                <FaYoutube size={16} />
+              </a>
 
-  </Link>
+              <a
+                href="https://www.facebook.com/sambadsironam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-gray-400 transition-colors"
+              >
+                <FaFacebookF size={13} />
+              </a>
 
-  {/* Right Section - Far Right */}
-  <div className="flex items-center gap-3 md:gap-5 z-10 ml-auto pr-2 sm:pr-4 lg:pr-6">
+              <a
+                href="https://instagram.com/sambadsironam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-400 hover:text-gray-400 transition-colors"
+              >
+                <FaInstagram size={14} />
+              </a>
+            </div>
 
-    <div className="hidden md:flex items-center gap-3">
-      <a
-        href="https://www.youtube.com/@sambadsironamdigital"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-red-400 hover:text-gray-400 transition-colors"
-      >
-        <FaYoutube size={22} />
-      </a>
+            <button
+              className="xl:hidden text-white p-2"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
 
-      <a
-        href="https://www.facebook.com/sambadsironam"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-400 hover:text-gray-400 transition-colors"
-      >
-        <FaFacebookF size={18} />
-      </a>
+          </div>
 
-      <a
-        href="https://instagram.com/sambadsironam"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-pink-400 hover:text-gray-400 transition-colors"
-      >
-        <FaInstagram size={18} />
-      </a>
-    </div>
-
-    <div className="flex md:hidden items-center gap-2">
-      <a
-        href="https://www.youtube.com/@sambadsironamdigital"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-red-400 hover:text-gray-400 transition-colors"
-      >
-        <FaYoutube size={16} />
-      </a>
-
-      <a
-        href="https://www.facebook.com/sambadsironam"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-400 hover:text-gray-400 transition-colors"
-      >
-        <FaFacebookF size={13} />
-      </a>
-
-      <a
-        href="https://instagram.com/sambadsironam"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-pink-400 hover:text-gray-400 transition-colors"
-      >
-        <FaInstagram size={14} />
-      </a>
-    </div>
-
-    <button
-      className="md:hidden text-white p-2"
-      onClick={() => setMobileOpen(!mobileOpen)}
-    >
-      {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-    </button>
-
-  </div>
-
-</div>
+        </div>
 
         {/* Nav Bar */}
-        <div className="border-t border-white/10 hidden md:block overflow-x-auto">
-          <div className="min-w-min">
-            <nav className="flex items-center gap-0 px-4">
-              {NAV_ITEMS.map((item) => (
-                <div
-                  key={item.label}
-                  className="relative group"
-                  onMouseEnter={() => item.children.length > 0 && setActiveMenu(item.label)}
-                  onMouseLeave={() => setActiveMenu(null)}
-                >
-                  {item.external ? (
-  <a
-    href={item.href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center gap-1 lg:px-3 md:px-2 py-3 text-xs lg:text-sm text-gray-200 hover:text-yellow-400 transition-colors whitespace-nowrap"
-    style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-  >
-    {item.label}
-    {item.children.length > 0 && (
-      <ChevronDown size={12} className="opacity-60" />
-    )}
-  </a>
-) : (
-  <Link
-    to={item.href}
-    className="flex items-center gap-1 lg:px-3 md:px-2 py-3 text-xs lg:text-sm text-gray-200 hover:text-yellow-400 transition-colors whitespace-nowrap"
-    style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-  >
-    {item.label}
-    {item.children.length > 0 && (
-      <ChevronDown size={12} className="opacity-60" />
-    )}
-  </Link>
-)}
-                  {item.children.length > 0 && activeMenu === item.label && (
-                    <div className="absolute top-full left-0 bg-white dark:bg-gray-900 shadow-xl rounded-b-lg py-2 min-w-[180px] z-50 border-t-2 border-red-600">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.label}
-                          to={child.href}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-red-50 dark:hover:bg-gray-800 hover:text-red-600 transition-colors"
+        <div className="border-t border-white/10 overflow-visible relative z-[999]">
+          {/* Scrollable container for mobile/tablet, overflow-visible for desktop */}
+          <div className="overflow-x-auto xl:overflow-visible scrollbar-hide">
+            <div className="relative overflow-visible min-w-max xl:min-w-0">
+              <nav className="relative flex flex-row flex-nowrap xl:flex-wrap items-center justify-start xl:justify-center gap-0 px-4 overflow-visible">
+                {NAV_ITEMS.filter((item) => item.label !== "এক্সক্লুসিভ" && item.label !== "ই-পেপার").map((item) => {
+                  const hasChildren = item.children.length > 0;
+                  const isOpen = openMenu === item.label;
+
+                  return (
+                    <div
+                      key={item.label}
+                      className="relative flex items-center"
+                      onMouseEnter={() => handleMouseEnter(item.label, hasChildren)}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      {hasChildren ? (
+                        <DropdownMenu open={isOpen} onOpenChange={(open) => setOpenMenu(open ? item.label : null)}>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              onClick={(e) => handleTriggerClick(e, item.label, hasChildren)}
+                              className="flex items-center gap-1 xl:px-3 px-2 py-3 text-xs xl:text-sm text-gray-200 hover:text-yellow-400 transition-colors whitespace-nowrap outline-none cursor-pointer"
+                              style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                            >
+                              {item.label}
+                              <ChevronDown size={12} className={`opacity-60 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl p-1 min-w-[140px] z-[99999]">
+                            {/* All Link */}
+                            <DropdownMenuItem asChild>
+                              <Link
+                                to={item.href}
+                                onClick={() => setOpenMenu(null)}
+                                className="block w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-red-50 dark:hover:bg-gray-800 hover:text-red-600 rounded-md transition-colors cursor-pointer"
+                                style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                              >
+                                সব {item.label}
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800 my-1" />
+                            {item.children.map((child) => (
+                              <DropdownMenuItem key={child.label} asChild>
+                                <Link
+                                  to={child.href}
+                                  onClick={() => setOpenMenu(null)}
+                                  className="block w-full px-4 py-2 text-xs text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-gray-800 hover:text-red-600 rounded-md transition-colors cursor-pointer"
+                                  style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                                >
+                                  {child.label}
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : item.external ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 xl:px-3 px-2 py-3 text-xs xl:text-sm text-gray-200 hover:text-yellow-400 transition-colors whitespace-nowrap"
                           style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
                         >
-                          {child.label}
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link
+                          to={item.href}
+                          className="flex items-center gap-1 xl:px-3 px-2 py-3 text-xs xl:text-sm text-gray-200 hover:text-yellow-400 transition-colors whitespace-nowrap"
+                          style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                        >
+                          {item.label}
                         </Link>
-                      ))}
+                      )}
                     </div>
-                  )}
+                  );
+                })}
+                <div className="flex-shrink-0 flex items-center gap-2 py-1.5 ml-2">
+                  <Link
+                    to="/category/exclusive"
+                    className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-full transition-colors font-medium animate-pulse whitespace-nowrap"
+                    style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                  >
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                    এক্সক্লুসিভ
+                  </Link>
                 </div>
-              ))}
-              <div className="flex-shrink-0 flex items-center gap-2 py-1.5 ml-2">
-                <Link to="/live-tv" className="hidden lg:flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-full transition-colors font-medium">
-                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  লাইভ
-                </Link>
-              </div>
-            </nav>
+              </nav>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Breaking News Ticker */}
-      <div className="bg-red-800 text-white py-2 overflow-hidden">
+      <div className="relative bg-red-800 text-white py-2 overflow-hidden z-10">
         <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-3">
           <span className="flex-shrink-0 flex items-center gap-1.5 bg-white text-red-600 text-xs font-bold px-3 py-1 rounded-full">
             <Zap size={11} />
@@ -453,36 +490,36 @@ const time = currentTime.toLocaleTimeString("bn-IN", {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-gray-900/95 text-white overflow-y-auto">
+        <div className="xl:hidden fixed inset-0 z-50 bg-gray-900/95 text-white overflow-y-auto">
           <div className="p-4">
             <div className="flex items-center justify-between mb-6">
-              
+
               <button onClick={() => setMobileOpen(false)}><X size={24} /></button>
             </div>
             <div className="space-y-1">
               {NAV_ITEMS.map((item) => (
                 <div key={item.label}>
                   {item.external ? (
-  <a
-    href={item.href}
-    target="_blank"
-    rel="noopener noreferrer"
-    onClick={() => setMobileOpen(false)}
-    className="flex items-center justify-between w-full py-3 px-2 border-b border-white/10 text-gray-200 hover:text-yellow-400 transition-colors"
-    style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-  >
-    {item.label}
-  </a>
-) : (
-  <Link
-    to={item.href}
-    onClick={() => setMobileOpen(false)}
-    className="flex items-center justify-between w-full py-3 px-2 border-b border-white/10 text-gray-200 hover:text-yellow-400 transition-colors"
-    style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-  >
-    {item.label}
-  </Link>
-)}
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between w-full py-3 px-2 border-b border-white/10 text-gray-200 hover:text-yellow-400 transition-colors"
+                      style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between w-full py-3 px-2 border-b border-white/10 text-gray-200 hover:text-yellow-400 transition-colors"
+                      style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                   {item.children.length > 0 && (
                     <div className="pl-4 space-y-0">
                       {item.children.map(child => (

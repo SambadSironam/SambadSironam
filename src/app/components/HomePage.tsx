@@ -2,15 +2,15 @@ import { useState, useEffect } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
 import { Link } from "react-router-dom";
-import emailjs from "@emailjs/browser";
+
 import {
-  TrendingUp, Clock, Eye, Heart, Share2, Bookmark, Play,
+  TrendingUp, Eye, Heart, Share2, Play,
   ChevronRight, Star, Zap, Camera, BarChart2, BookOpen,
-  Headphones, Monitor, FlameKindling, Newspaper
+  Monitor, FlameKindling, Newspaper, ArrowLeft, ArrowRight
 } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "./ui/carousel";
 
 function NewsCard({ story }: { story: any }) {
-  const [saved, setSaved] = useState(false);
   return (
     <Link to={`/article/${story.id}`} className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
       <div className="relative overflow-hidden aspect-video bg-gray-100">
@@ -33,23 +33,11 @@ function NewsCard({ story }: { story: any }) {
         >
           {story.title}
         </h3>
-        <div className="flex items-center justify-between mt-3 text-gray-400 text-xs">
+        <div className="flex items-center mt-3 text-gray-400 text-xs">
           <span className="flex items-center gap-1">
-            <Clock size={11} />
-            {story.time}
+            <Eye size={11} />
+            {story.views} Views
           </span>
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1">
-              <Eye size={11} />
-              {story.views}
-            </span>
-            <button
-              onClick={e => { e.preventDefault(); setSaved(!saved); }}
-              className={`transition-colors ${saved ? "text-red-500" : "hover:text-red-500"}`}
-            >
-              <Bookmark size={12} fill={saved ? "currentColor" : "none"} />
-            </button>
-          </div>
         </div>
       </div>
     </Link>
@@ -121,8 +109,34 @@ function getTimeAgo(timestamp: any) {
 export function HomePage() {
   const [news, setNews] = useState<any[]>([]);
   const [subscriberEmail, setSubscriberEmail] = useState("");
+  const [api, setApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
+      setCurrentSlide(api.selectedScrollSnap());
+    };
+
+    api.on("select", onSelect);
+    setCurrentSlide(api.selectedScrollSnap());
+
+    const interval = setInterval(() => {
+      if (api.canScrollNext()) {
+        api.scrollNext();
+      } else {
+        api.scrollTo(0);
+      }
+    }, 5000);
+
+    return () => {
+      api.off("select", onSelect);
+      clearInterval(interval);
+    };
+  }, [api]);
   const westBengalNews = news.filter(
-  item => item.category === "west-bengal"
+  item => ["west-bengal", "north-bengal", "south-bengal"].includes(item?.category)
 ).slice(0,3);
 
 const politicsNews = news.filter(
@@ -130,11 +144,10 @@ const politicsNews = news.filter(
 ).slice(0,3);
 
 const sportsNews = news.filter(
-  item => item.category === "sports"
+  item => ["sports", "cricket", "football", "other-sports"].includes(item?.category)
 ).slice(0,3);
 
 const businessNews = news.filter(
-  
   item => item.category === "business"
 ).slice(0,3);
 
@@ -174,83 +187,164 @@ useEffect(() => {
 
   loadNews();
 }, []);
-const handleSubscribe = async () => {
-  if (!subscriberEmail.trim()) {
-    alert("Please enter your email.");
-    return;
-  }
+  const handleSubscribe = async () => {
+    if (!subscriberEmail.trim()) {
+      alert("অনুগ্রহ করে আপনার ইমেইল ঠিকানা লিখুন।");
+      return;
+    }
 
-  try {
-    await emailjs.send(
-      "YOUR_SERVICE_ID",
-      "YOUR_TEMPLATE_ID",
-      {
-        subscriber_email: subscriberEmail,
-        time: new Date().toLocaleString(),
-      },
-      "YOUR_PUBLIC_KEY"
-    );
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/sambadsironam2002@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          email: subscriberEmail,
+          _subject: "New Newsletter Subscriber!",
+          _message: `A new user has subscribed to the newsletter: ${subscriberEmail}`
+        })
+      });
 
-    alert("Thank you for subscribing!");
-    setSubscriberEmail("");
-
-  } catch (error) {
-    console.error(error);
-    alert("Failed to subscribe.");
-  }
-};
+      if (response.ok) {
+        alert("সাবস্ক্রাইব করার জন্য ধন্যবাদ! আপনার ইমেইল ইনবক্স চেক করুন এবং সাবস্ক্রিপশন নিশ্চিত করুন।");
+        setSubscriberEmail("");
+      } else {
+        throw new Error("Failed to subscribe");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("দুঃখিত, সাবস্ক্রাইব করা সম্ভব হয়নি। অনুগ্রহ করে পরে আবার চেষ্টা করুন।");
+    }
+  };
   return (
     <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#121212]">
       {/* Hero Section */}
       <section className="max-w-[1440px] mx-auto px-4 pt-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Main Hero */}
-          <div className="lg:col-span-2">
-            {news.slice(0, 1).map((item: any) => (
-              <Link key={item.id} to={`/article/${item.id}`} className="group relative block rounded-2xl overflow-hidden aspect-[16/9] bg-gray-200">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    {item.isLive && (
-                      <span className="flex items-center gap-1 bg-red-600 text-white text-xs px-2.5 py-1 rounded-full font-bold animate-pulse">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                        লাইভ আপডেট
-                      </span>
-                    )}
-                    <span
-                      className="bg-yellow-400 text-gray-900 text-xs px-2.5 py-1 rounded-full font-bold"
-                      style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+          {/* Main Hero (10 Slides Carousel) */}
+          <div className="lg:col-span-2 relative">
+            {news.length > 0 ? (
+              <Carousel setApi={setApi} className="w-full group" opts={{ loop: true }}>
+                <CarouselContent className="-ml-0">
+                  {news.slice(0, 10).map((item: any) => (
+                    <CarouselItem key={item.id} className="pl-0">
+                      <Link to={`/article/${item.id}`} className="relative block rounded-2xl overflow-hidden aspect-[16/9] bg-gray-200">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                        <div className="absolute inset-x-0 bottom-0 p-6 pr-12 md:pr-16">
+                          <div className="flex items-center gap-2 mb-2">
+                            {item.isLive && (
+                              <span className="flex items-center gap-1 bg-red-600 text-white text-xs px-2.5 py-1 rounded-full font-bold animate-pulse">
+                                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                                লাইভ আপডেট
+                              </span>
+                            )}
+                            <span
+                              className="bg-yellow-400 text-gray-900 text-xs px-2.5 py-1 rounded-full font-bold"
+                              style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                            >
+                              {item.category}
+                            </span>
+                          </div>
+                          <h1
+                            className="text-white mb-2 leading-snug hover:text-yellow-300 transition-colors"
+                            style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "clamp(1.1rem,3vw,1.7rem)", fontWeight: 700 }}
+                          >
+                            {item.title}
+                          </h1>
+                          <p
+                            className="text-gray-300 text-sm line-clamp-2"
+                            style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
+                          >
+                            {item.subtitle}
+                          </p>
+                           <div className="flex items-center gap-3 mt-3 text-gray-400 text-xs">
+                             <span className="flex items-center gap-1"><Eye size={12} />{item.views || 0} Views পাঠক</span>
+                             <button className="ml-auto flex items-center gap-1 text-gray-300 hover:text-white">
+                               <Share2 size={13} /> শেয়ার
+                             </button>
+                           </div>
+                        </div>
+                      </Link>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+
+                {/* Custom Navigation Buttons (Fade in on Hover) */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    api?.scrollPrev();
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-25 bg-black/40 hover:bg-black/70 text-white rounded-full p-2.5 transition-all duration-300 opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    api?.scrollNext();
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-25 bg-black/40 hover:bg-black/70 text-white rounded-full p-2.5 transition-all duration-300 opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                >
+                  <ArrowRight size={18} />
+                </button>
+
+                {/* Custom Dots Indicators */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 bg-black/20 px-3 py-1.5 rounded-full backdrop-blur-[2px]">
+                  {news.slice(0, 10).map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        api?.scrollTo(idx);
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        currentSlide === idx ? "bg-yellow-400 w-4" : "bg-white/50 hover:bg-white/80"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </Carousel>
+            ) : (
+              <div className="w-full aspect-[16/9] bg-gray-300 rounded-2xl animate-pulse" />
+            )}
+          </div>
+
+          {/* Trending (Mobile/iPad view only) */}
+          <div className="lg:hidden bg-white dark:bg-gray-900 rounded-xl shadow-sm overflow-hidden mb-5">
+            <div className="bg-red-600 px-4 py-3 flex items-center gap-2">
+              <TrendingUp size={16} className="text-white" />
+              <h3 className="text-white font-bold" style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "1rem" }}>
+                ট্রেন্ডিং
+              </h3>
+            </div>
+            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              {trendingNews.map((item: any, index: number) => (
+                <Link key={item.id} to={`/article/${item.id}`} className="group flex items-start gap-3 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <span className="flex-shrink-0 w-6 h-6 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full text-xs font-bold flex items-center justify-center">
+                    {index + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="text-gray-800 dark:text-gray-200 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug"
+                      style={{ fontFamily: "'Noto Serif Bengali', serif", fontWeight: 600, fontSize: "0.875rem" }}
                     >
-                      {item.category}
+                      {item.title}
+                    </p>
+                    <span className="text-gray-400 text-xs mt-1 flex items-center gap-1">
+                      <Eye size={10} /> {item.views || 0} Views
                     </span>
                   </div>
-                  <h1
-                    className="text-white mb-2 leading-snug group-hover:text-yellow-300 transition-colors"
-                    style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "clamp(1.1rem,3vw,1.7rem)", fontWeight: 700 }}
-                  >
-                    {item.title}
-                  </h1>
-                  <p
-                    className="text-gray-300 text-sm line-clamp-2"
-                    style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-                  >
-                    {item.subtitle}
-                  </p>
-                  <div className="flex items-center gap-3 mt-3 text-gray-400 text-xs">
-                    <span className="flex items-center gap-1"><Clock size={12} />{item.time}</span>
-                    <span className="flex items-center gap-1"><Eye size={12} />{item.views || 0} Views পাঠক</span>
-                    <button className="ml-auto flex items-center gap-1 text-gray-300 hover:text-white">
-                      <Share2 size={13} /> শেয়ার
-                    </button>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Sidebar: Top Stories */}
@@ -285,9 +379,7 @@ const handleSubscribe = async () => {
                   >
                     {story.title}
                   </p>
-                  <span className="text-gray-400 text-xs mt-1 flex items-center gap-1">
-                    <Clock size={10} /> {story.time}
-                  </span>
+
                 </div>
               </Link>
             ))}
@@ -299,7 +391,7 @@ const handleSubscribe = async () => {
 
       {/* Main Content + Sidebar */}
       <div className="max-w-[1440px] mx-auto px-4">
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
           <main>
             {/* Latest News with Tabs */}
             <section className="mb-10">
@@ -335,9 +427,7 @@ const handleSubscribe = async () => {
                         {item.title}
                       </p>
                     </div>
-                    <span className="text-gray-400 text-xs flex-shrink-0 flex items-center gap-1">
-                      <Clock size={10} /> Just now
-                    </span>
+
                   </Link>
                 ))}
               </div>
@@ -513,8 +603,8 @@ const handleSubscribe = async () => {
 
           {/* Right Sidebar */}
           <aside className="space-y-6">
-            {/* Trending */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm overflow-hidden">
+            {/* Trending (Desktop only) */}
+            <div className="hidden lg:block bg-white dark:bg-gray-900 rounded-xl shadow-sm overflow-hidden">
               <div className="bg-red-600 px-4 py-3 flex items-center gap-2">
                 <TrendingUp size={16} className="text-white" />
                 <h3 className="text-white font-bold" style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "1rem" }}>
@@ -544,52 +634,7 @@ const handleSubscribe = async () => {
               </div>
             </div>
 
-            {/* Live TV Widget */}
-            <div className="bg-gray-900 rounded-xl overflow-hidden shadow-sm">
-              <div className="aspect-video relative bg-gray-800 flex items-center justify-center">
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                  <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center mb-3 animate-pulse">
-                    <Play size={22} className="ml-1" />
-                  </div>
-                  <p style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }} className="text-sm">লাইভ টিভি দেখুন</p>
-                </div>
-              </div>
-              <div className="p-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  <span className="text-white text-xs font-bold" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                    সংবাদ শিরোনাম — লাইভ
-                  </span>
-                </div>
-                <p className="text-gray-400 text-xs mt-1" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                  এখন সম্প্রচার: বিকেলের প্রধান সংবাদ
-                </p>
-              </div>
-            </div>
 
-            {/* E-Paper */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm overflow-hidden">
-              <div className="bg-[#0B1F3A] px-4 py-3">
-                <h3 className="text-white font-bold flex items-center gap-2" style={{ fontFamily: "'Noto Serif Bengali', serif", fontSize: "1rem" }}>
-                  <Newspaper size={16} /> আজকের ই-পেপার
-                </h3>
-              </div>
-              <div className="p-4">
-                <div className="aspect-[3/4] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 text-sm mb-3">
-                  পেপার প্রিভিউ
-                </div>
-                <p className="text-gray-500 text-xs text-center mb-3" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
-                  {new Date().toLocaleDateString("bn-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-                </p>
-                <a
-                  href="/epaper"
-                  className="block w-full bg-[#0B1F3A] text-white text-center py-2.5 rounded-xl text-sm font-medium hover:bg-blue-900 transition-colors"
-                  style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-                >
-                  সম্পূর্ণ পেপার পড়ুন
-                </a>
-              </div>
-            </div>
 
             {/* Ad */}
             <div className="bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex items-center justify-center py-10 text-gray-400 text-sm">

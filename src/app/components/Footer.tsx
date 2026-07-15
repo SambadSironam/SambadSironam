@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, ArrowUp } from "lucide-react";
 import logoImg from "../../imports/logo.png";
-import { FaYoutube } from "react-icons/fa6";
+import { FaYoutube, FaApple, FaGooglePlay } from "react-icons/fa6";
 
 const FOOTER_LINKS = [
   {
@@ -141,7 +141,7 @@ export function Footer() {
                 href="#"
                 className="flex items-center gap-2 bg-white text-gray-900 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <span className="text-lg">🍎</span>
+                <FaApple size={24} className="text-gray-900" />
                 <div className="text-left">
                   <div className="text-[10px] text-gray-500">Download on the</div>
                   <div className="font-bold text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>App Store</div>
@@ -151,7 +151,7 @@ export function Footer() {
                 href="#"
                 className="flex items-center gap-2 bg-white text-gray-900 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <span className="text-lg">▶</span>
+                <FaGooglePlay size={20} className="text-gray-900" />
                 <div className="text-left">
                   <div className="text-[10px] text-gray-500">Get it on</div>
                   <div className="font-bold text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>Google Play</div>
