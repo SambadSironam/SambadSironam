@@ -45,6 +45,7 @@ export function AdminDashboard() {
   // Manage News state
   const [articles, setArticles] = useState<any[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(3);
 
   const fetchArticles = async () => {
     setLoadingArticles(true);
@@ -239,6 +240,7 @@ export function AdminDashboard() {
     setImage(null);
     setContent("");
     setExistingImageUrl("");
+    setVisibleCount(3);
   };
 
   const handleLogout = async () => {
@@ -472,7 +474,7 @@ export function AdminDashboard() {
           <p>লোড হচ্ছে...</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {articles.map((art) => (
+            {articles.slice(0, visibleCount).map((art) => (
               <div
                 key={art.id}
                 style={{
@@ -547,6 +549,25 @@ export function AdminDashboard() {
                 </div>
               </div>
             ))}
+            {articles.length > visibleCount && (
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 10)}
+                style={{
+                  marginTop: "10px",
+                  background: "#0B1F3A",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  fontWeight: "bold",
+                  alignSelf: "center",
+                }}
+              >
+                আরও দেখুন (Show More)
+              </button>
+            )}
             {articles.length === 0 && <p style={{ color: "#6c757d" }}>কোনো সংবাদ পাওয়া যায়নি।</p>}
           </div>
         )}
