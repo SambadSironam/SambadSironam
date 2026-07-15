@@ -134,7 +134,7 @@ export default function ContactPage() {
               অফিস
             </h3>
 
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
 
               ২০, সতীশ চন্দ্র ঘোষ লেন,<br/>
 
@@ -148,10 +148,35 @@ export default function ContactPage() {
 
             </p>
 
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=20,+Satish+Chandra+Ghosh+Lane,+Mahesh+Colony,+Serampore,+Hooghly,+West+Bengal+712201"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full inline-block text-sm font-semibold transition mt-2"
+            >
+              Google Maps-এ দেখুন
+            </a>
+
           </div>
 
         </div>
 
+      </section>
+
+      {/* Google Maps Embed */}
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden p-2">
+          <iframe
+            src="https://maps.google.com/maps?q=20%20Satish%20Chandra%20Ghosh%20Lane%2C%20Mahesh%20Colony%2C%20Serampore%20Hooghly%20West%20Bengal%20712201&t=&z=16&ie=UTF8&iwloc=&output=embed"
+            width="100%"
+            height="450"
+            style={{ border: 0, borderRadius: "20px" }}
+            allowFullScreen={true}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Google Maps"
+          />
+        </div>
       </section>
 
 

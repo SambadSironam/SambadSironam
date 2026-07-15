@@ -65,10 +65,15 @@ export function Footer() {
                 <Phone size={14} className="text-yellow-400 flex-shrink-0" />
                 <span style={{ fontFamily: "'Inter', sans-serif" }}>+91-8900568880 , +91-3345299592</span>
               </div>
-              <div className="flex items-center gap-2">
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=20,+Satish+Chandra+Ghosh+Lane,+Mahesh+Colony,+Serampore,+Hooghly,+West+Bengal+712201"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-white transition-colors"
+              >
                 <MapPin size={14} className="text-yellow-400 flex-shrink-0" />
                 <span style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>২০, সতীশ চন্দ্র ঘোষ লেন,মহেশ কলোনি,শ্রীরামপুর, হুগলি,পশ্চিমবঙ্গ – ৭১২২০১।</span>
-              </div>
+              </a>
             </div>
 
             {/* Social */}
