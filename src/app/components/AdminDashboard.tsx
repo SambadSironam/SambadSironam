@@ -979,7 +979,7 @@ export function AdminDashboard() {
                   {w.photo ? (
                     <img src={w.photo} alt={w.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
-                    <div style={{ display: "flex", alignItems: "center", justify: "center", height: "100%", color: "#6c757d", fontSize: "0.8rem" }}>No Pic</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#6c757d", fontSize: "0.8rem" }}>No Pic</div>
                   )}
                 </div>
                 <div style={{ minWidth: 0, flex: 1 }}>
