@@ -30,7 +30,6 @@ export function EditorDashboard() {
   const [description, setDescription] = useState("");
   const [author, setAuthor] = useState("");
   const [location, setLocation] = useState("");
-  const [subcategory, setSubcategory] = useState("");
 
   // Edit mode state
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
@@ -169,7 +168,6 @@ export function EditorDashboard() {
           author,
           location,
           category,
-          subcategory,
           image: finalImageUrl,
           content,
           updatedAt: new Date(),
@@ -183,7 +181,6 @@ export function EditorDashboard() {
           author,
           location,
           category,
-          subcategory,
           image: finalImageUrl,
           content,
           views: 0,
@@ -229,7 +226,6 @@ export function EditorDashboard() {
     setAuthor(article.author || "Sambad Sironam");
     setLocation(article.location || "");
     setCategory(article.category || "");
-    setSubcategory(article.subcategory || "");
     setContent(article.content || "");
     setExistingImageUrl(article.image || "");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -242,7 +238,6 @@ export function EditorDashboard() {
     setAuthor("");
     setLocation("");
     setCategory("");
-    setSubcategory("");
     setImage(null);
     setContent("");
     setExistingImageUrl("");
@@ -353,7 +348,7 @@ export function EditorDashboard() {
         }}
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+      <div style={{ marginBottom: "15px" }}>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -362,6 +357,7 @@ export function EditorDashboard() {
             borderRadius: "6px",
             border: "1px solid #ccc",
             width: "100%",
+            background: "#fff",
           }}
         >
           <option value="">Select Main Category</option>
@@ -384,39 +380,77 @@ export function EditorDashboard() {
           <option value="exclusive">এক্সক্লুসিভ</option>
           <option value="editorial">সম্পাদকীয়</option>
         </select>
-
-        <input
-          type="text"
-          placeholder="Subcategory (optional)"
-          value={subcategory}
-          onChange={(e) => setSubcategory(e.target.value)}
-          style={{
-            padding: "12px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            width: "100%",
-          }}
-        />
       </div>
 
       <div style={{ marginBottom: "20px" }}>
-        <label style={{ display: "block", fontSize: "0.9rem", fontWeight: "bold", marginBottom: "5px" }}>
-          News Image Cover
+        <label style={{ display: "block", fontSize: "0.95rem", fontWeight: "bold", marginBottom: "8px", color: "#495057" }}>
+          খবরের মূল ছবি (News Cover Image)
         </label>
+        
         <input
           type="file"
+          id="news-image-input"
           accept="image/*"
           onChange={(e) => {
             if (e.target.files && e.target.files[0]) {
               setImage(e.target.files[0]);
             }
           }}
+          style={{ display: "none" }}
         />
-        {existingImageUrl && !image && (
-          <p style={{ marginTop: "10px", fontSize: "0.85rem", color: "#666" }}>
-            Current Image: <a href={existingImageUrl} target="_blank" rel="noreferrer" style={{ color: "#0284c7" }}>View Image</a>
-          </p>
-        )}
+
+        <div
+          onClick={() => document.getElementById("news-image-input")?.click()}
+          style={{
+            border: "2px dashed #0284c7",
+            borderRadius: "10px",
+            padding: "25px",
+            textAlign: "center",
+            cursor: "pointer",
+            background: "#f0f9ff",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {image ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+              <img
+                src={URL.createObjectURL(image)}
+                alt="Selected Preview"
+                style={{ maxHeight: "150px", borderRadius: "8px", objectFit: "contain", border: "1px solid #e2e8f0" }}
+              />
+              <div style={{ fontSize: "0.85rem", color: "#0369a1", fontWeight: "bold" }}>
+                Selected: {image.name}
+              </div>
+              <span style={{ fontSize: "0.75rem", background: "#0284c7", color: "#fff", padding: "4px 10px", borderRadius: "4px", fontWeight: "bold" }}>
+                পরিবর্তন করুন (Change Image)
+              </span>
+            </div>
+          ) : existingImageUrl ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+              <img
+                src={existingImageUrl}
+                alt="Current Preview"
+                style={{ maxHeight: "150px", borderRadius: "8px", objectFit: "contain", border: "1px solid #e2e8f0" }}
+              />
+              <div style={{ fontSize: "0.85rem", color: "#475569" }}>
+                বর্তমান ছবি (Existing Image)
+              </div>
+              <span style={{ fontSize: "0.75rem", background: "#0284c7", color: "#fff", padding: "4px 10px", borderRadius: "4px", fontWeight: "bold" }}>
+                নতুন ছবি নির্বাচন করুন (Upload New)
+              </span>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+              <div style={{ fontSize: "2rem", color: "#0284c7" }}>🖼️</div>
+              <div style={{ fontSize: "0.95rem", fontWeight: "bold", color: "#0369a1" }}>
+                ছবি আপলোড করতে এখানে ক্লিক করুন (Click to Select News Image)
+              </div>
+              <div style={{ fontSize: "0.8rem", color: "#64748b" }}>
+                JPEG, PNG, WebP format supported
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={{ marginBottom: "20px" }}>
