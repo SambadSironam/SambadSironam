@@ -27,31 +27,7 @@ const SECTION_META: Record<string, { title: string; description: string; color: 
   },
 };
 
-function getTimeAgo(timestamp: any) {
-  if (!timestamp) return "";
 
-  const date = typeof timestamp?.toDate === "function" ? timestamp.toDate() : new Date(timestamp);
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diff < 60) return "এইমাত্র";
-
-  const minutes = Math.floor(diff / 60);
-  if (minutes < 60) return `${minutes} মিনিট আগে`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} ঘণ্টা আগে`;
-
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "গতকাল";
-  if (days < 30) return `${days} দিন আগে`;
-
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} মাস আগে`;
-
-  const years = Math.floor(months / 12);
-  return `${years} বছর আগে`;
-}
 
 export default function SectionPage() {
   const { slug } = useParams<{ slug: string }>();

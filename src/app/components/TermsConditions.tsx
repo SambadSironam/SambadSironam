@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FileText, Award, HelpCircle, CheckCircle } from "lucide-react";
+import { FileText } from "lucide-react";
 
 export default function TermsConditions() {
   useEffect(() => {

@@ -4,9 +4,9 @@ import { db } from "../../firebase";
 import { Link } from "react-router-dom";
 
 import {
-  TrendingUp, Eye, Heart, Share2, Play,
-  ChevronRight, Star, Zap, Camera, BarChart2, BookOpen,
-  Monitor, FlameKindling, Newspaper, ArrowLeft, ArrowRight
+  TrendingUp, Eye, Share2,
+  ChevronRight, Star, Zap, Camera,
+  FlameKindling, ArrowLeft, ArrowRight
 } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "./ui/carousel";
 
@@ -135,10 +135,6 @@ export function HomePage() {
       clearInterval(interval);
     };
   }, [api]);
-  const westBengalNews = news.filter(
-  item => ["west-bengal", "north-bengal", "south-bengal"].includes(item?.category)
-).slice(0,3);
-
 const politicsNews = news.filter(
   item => item.category === "politics"
 ).slice(0,3);
@@ -159,10 +155,6 @@ const photoNews = news
   .filter((item) => item.image)
   .slice(0, 4);
 
-const editorPickNews = news
-
-  .filter((item) => item.category === "editor-pick")
-  .slice(0, 4);
 const trendingNews = [...news]
   .sort((a: any, b: any) => (b.views || 0) - (a.views || 0))
   .slice(0, 5);

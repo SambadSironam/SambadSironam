@@ -93,7 +93,6 @@ export function ArticlePage() {
   }, [id]);
 
   const [fontSize, setFontSize] = useState(16);
-  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);

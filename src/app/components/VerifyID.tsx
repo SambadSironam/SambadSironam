@@ -3,25 +3,13 @@ import { useSearchParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import logoImg from "../../imports/logo.png";
-import { CheckCircle2, AlertTriangle, ShieldCheck, Calendar, Phone, Mail, Award } from "lucide-react";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function VerifyID() {
   const [searchParams] = useSearchParams();
   const workerId = searchParams.get("id");
   const [worker, setWorker] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState("");
-
-  useEffect(() => {
-    // Keep a ticking security timestamp to prevent static image forging
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleString("bn-BD", { timeZone: "Asia/Kolkata" }) + " IST");
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const fetchWorker = async () => {

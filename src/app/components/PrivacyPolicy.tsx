@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Shield, Mail, FileText, Scale } from "lucide-react";
+import { Shield, Mail, Scale } from "lucide-react";
 
 export default function PrivacyPolicy() {
   useEffect(() => {

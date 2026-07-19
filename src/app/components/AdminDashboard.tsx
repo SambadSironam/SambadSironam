@@ -17,7 +17,6 @@ import {
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { db, auth, storage } from "../../firebase";
-import logoImg from "../../imports/logo.png";
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -36,6 +35,8 @@ export function AdminDashboard() {
   const [workerPhoto, setWorkerPhoto] = useState<File | null>(null);
   const [workerStatus, setWorkerStatus] = useState("Active");
   const [uploadingWorker, setUploadingWorker] = useState(false);
+  const [editingWorkerId, setEditingWorkerId] = useState<string | null>(null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
 
   const fetchWorkers = async () => {
     setLoadingWorkers(true);
@@ -99,11 +100,16 @@ export function AdminDashboard() {
       const trimmedId = workerIdInput.trim();
       const safeId = trimmedId.replace(/\//g, "_");
 
-      let photoUrl = "";
+      let photoUrl = existingPhotoUrl || "";
       if (workerPhoto) {
         const photoRef = ref(storage, `workers/${safeId}-${Date.now()}-${workerPhoto.name}`);
         await uploadBytes(photoRef, workerPhoto);
         photoUrl = await getDownloadURL(photoRef);
+      }
+
+      // If we are editing, and the document ID has changed (e.g. they edited worker ID)
+      if (editingWorkerId && editingWorkerId !== safeId) {
+        await deleteDoc(doc(db, "workers", editingWorkerId));
       }
 
       await setDoc(doc(db, "workers", safeId), {
@@ -120,7 +126,7 @@ export function AdminDashboard() {
         createdAt: serverTimestamp(),
       });
 
-      alert("Worker profile registered successfully!");
+      alert(editingWorkerId ? "প্রতিনিধির তথ্য সফলভাবে আপডেট করা হয়েছে!" : "কর্মী সফলভাবে নিবন্ধিত করা হয়েছে!");
 
       setWorkerIdInput("");
       setWorkerName("");
@@ -132,14 +138,47 @@ export function AdminDashboard() {
       setWorkerValidUntil("");
       setWorkerPhoto(null);
       setWorkerStatus("Active");
+      setEditingWorkerId(null);
+      setExistingPhotoUrl("");
 
       fetchWorkers();
     } catch (error: any) {
-      console.error("Error registering worker:", error);
+      console.error("Error saving worker:", error);
       alert(error.message);
     } finally {
       setUploadingWorker(false);
     }
+  };
+
+  const handleStartEdit = (worker: any) => {
+    setEditingWorkerId(worker.id);
+    setWorkerIdInput(worker.workerId || worker.id);
+    setWorkerName(worker.name || "");
+    setWorkerDob(worker.dob || "");
+    setWorkerDesignation(worker.designation || "");
+    setWorkerPhone(worker.phone || "");
+    setWorkerEmail(worker.email || "");
+    setWorkerBloodGroup(worker.bloodGroup || "");
+    setWorkerValidUntil(worker.validUntil || "");
+    setWorkerStatus(worker.status || "Active");
+    setExistingPhotoUrl(worker.photo || "");
+    setWorkerPhoto(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingWorkerId(null);
+    setWorkerIdInput("");
+    setWorkerName("");
+    setWorkerDob("");
+    setWorkerDesignation("");
+    setWorkerPhone("");
+    setWorkerEmail("");
+    setWorkerBloodGroup("");
+    setWorkerValidUntil("");
+    setWorkerPhoto(null);
+    setWorkerStatus("Active");
+    setExistingPhotoUrl("");
   };
 
   const handleWorkerDelete = async (id: string) => {
@@ -224,7 +263,7 @@ export function AdminDashboard() {
         }}
       >
         <h3 style={{ fontSize: "1.1rem", fontWeight: "bold", marginBottom: "15px", color: "#495057" }}>
-          👤 নতুন প্রতিনিধি যোগ করুন
+          {editingWorkerId ? "✏️ প্রতিনিধি তথ্য সম্পাদনা করুন" : "👤 নতুন প্রতিনিধি যোগ করুন"}
         </h3>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
@@ -397,23 +436,42 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        <button
-          onClick={handleWorkerUpload}
-          disabled={uploadingWorker}
-          style={{
-            background: "#28a745",
-            color: "#fff",
-            border: "none",
-            padding: "12px 20px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "0.95rem",
-            fontWeight: "bold",
-            width: "100%",
-          }}
-        >
-          {uploadingWorker ? "Saving Representative..." : "👥 প্রতিনিধি আইডি যুক্ত করুন"}
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            onClick={handleWorkerUpload}
+            disabled={uploadingWorker}
+            style={{
+              flex: 1,
+              background: editingWorkerId ? "#0284c7" : "#28a745",
+              color: "#fff",
+              border: "none",
+              padding: "12px 20px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+              fontWeight: "bold",
+            }}
+          >
+            {uploadingWorker ? "সংরক্ষণ করা হচ্ছে..." : editingWorkerId ? "💾 তথ্য আপডেট করুন" : "👥 প্রতিনিধি আইডি যুক্ত করুন"}
+          </button>
+          {editingWorkerId && (
+            <button
+              onClick={handleCancelEdit}
+              style={{
+                background: "#6c757d",
+                color: "#fff",
+                border: "none",
+                padding: "12px 20px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.95rem",
+                fontWeight: "bold",
+              }}
+            >
+              বাতিল করুন (Cancel)
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Workers List Section */}
@@ -484,6 +542,21 @@ export function AdminDashboard() {
                   }}
                 >
                   আইডি কার্ড
+                </button>
+                <button
+                  onClick={() => handleStartEdit(w)}
+                  style={{
+                    background: "#ffc107",
+                    color: "#212529",
+                    border: "none",
+                    padding: "6px 12px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Edit
                 </button>
                 <button
                   onClick={() => handleWorkerDelete(w.id)}

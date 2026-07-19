@@ -577,7 +577,6 @@ const [sortBy, setSortBy] = useState("সর্বশেষ");
 const [page, setPage] = useState(1);
 
 const [articles, setArticles] = useState<any[]>([]);
-const [loading, setLoading] = useState(true);
 
 const pageSize = 9;
 const totalPages = Math.ceil(articles.length / pageSize) || 1;
@@ -613,8 +612,6 @@ const categoryMap: Record<string, string> = {
 };
 useEffect(() => {
   const loadNews = async () => {
-    setLoading(true);
-
     try {
       const snapshot = await getDocs(collection(db, "news"));
 
@@ -643,8 +640,6 @@ setArticles(filtered);
     } catch (error) {
       console.error(error);
     }
-
-    setLoading(false);
   };
 
   loadNews();
