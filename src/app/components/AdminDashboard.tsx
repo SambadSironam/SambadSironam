@@ -148,73 +148,11 @@ export function AdminDashboard() {
         await deleteDoc(doc(db, "workers", id));
         alert("কর্মী সফলভাবে মুছে ফেলা হয়েছে।");
         fetchWorkers();
-        if (selectedQrWorker?.id === id) {
-          setSelectedQrWorker(null);
-        }
-        if (selectedIdCardWorker?.id === id) {
-          setSelectedIdCardWorker(null);
-        }
       } catch (error: any) {
         console.error("Error deleting worker:", error);
         alert("Failed to delete worker: " + error.message);
       }
     }
-  };
-
-  const handlePrintIdCard = () => {
-    if (!selectedIdCardWorker) return;
-    const printContent = document.getElementById("printable-id-card");
-    if (!printContent) return;
-
-    const printWindow = window.open("", "_blank", "width=600,height=800");
-    if (!printWindow) {
-      alert("Please allow popups to print the ID card.");
-      return;
-    }
-
-    let styles = "";
-    document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
-      styles += el.outerHTML;
-    });
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>ID Card - ${selectedIdCardWorker.name}</title>
-          ${styles}
-          <style>
-            body {
-              margin: 0;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              height: 100vh;
-              background: #fff;
-            }
-            #printable-id-card {
-              box-shadow: none !important;
-              border: 1px solid #000 !important;
-            }
-            @page {
-              size: auto;
-              margin: 0mm;
-            }
-          </style>
-        </head>
-        <body>
-          <div style="transform: scale(1.3);">
-            ${printContent.outerHTML}
-          </div>
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(function() { window.close(); }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
   };
 
   const handleLogout = async () => {
