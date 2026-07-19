@@ -22,6 +22,7 @@ import {
   ChevronDown,
   Bell,
   User,
+  ShieldCheck,
   Globe,
   Tv,
   Newspaper,
@@ -214,11 +215,19 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
           </div>
           <div className="flex items-center gap-3 text-[10px] sm:text-xs">
             <Link
-              to="/admin"
-              className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors"
+              to="/login"
+              className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors font-semibold"
             >
               <User size={12} />
               লগইন
+            </Link>
+            <span className="text-white/20">|</span>
+            <Link
+              to="/admin"
+              className="flex items-center gap-1 text-gray-300 hover:text-yellow-400 transition-colors"
+            >
+              <ShieldCheck size={12} />
+              অ্যাডমিন লগইন
             </Link>
             <button
               onClick={() => setDarkMode(!darkMode)}
@@ -538,13 +547,20 @@ export function Header({ darkMode, setDarkMode }: HeaderProps) {
                 </div>
               ))}
             </div>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="block w-full bg-[#001657] text-white text-center py-2.5 rounded-lg font-medium hover:bg-[#001657]/85 transition"
+              >
+                লগইন
+              </Link>
               <Link
                 to="/admin"
                 onClick={() => setMobileOpen(false)}
-                className="block w-full bg-red-600 text-white text-center py-2.5 rounded-lg font-medium"
+                className="block w-full bg-red-600 text-white text-center py-2.5 rounded-lg font-medium hover:bg-red-700 transition"
               >
-                লগইন
+                অ্যাডমিন লগইন
               </Link>
             </div>
           </div>

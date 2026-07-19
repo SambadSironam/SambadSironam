@@ -3,13 +3,11 @@ import { Navigate } from "react-router-dom";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "../../firebase";
 
-interface ProtectedRouteProps {
+interface EditorProtectedRouteProps {
   children: ReactNode;
 }
 
-export default function ProtectedRoute({
-  children,
-}: ProtectedRouteProps) {
+export function EditorProtectedRoute({ children }: EditorProtectedRouteProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,15 +40,20 @@ export default function ProtectedRoute({
 
   // Not logged in
   if (!user) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Only allow super admin
-  if (user.email !== "sambadsironam@gmail.com" && user.uid !== "15EZLzmUOzUel1PeAMshEmKqoRr1") {
+  // Admin should be redirected to admin dashboard, not here
+  if (user.email === "sambadsironam@gmail.com" || user.uid === "15EZLzmUOzUel1PeAMshEmKqoRr1") {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
+  // Only allow normal editor login
+  if (user.email !== "sambadsironam2002@gmail.com" && user.uid !== "AgAvJsw7hlTzfgFnRAvufMhINSC2") {
     auth.signOut();
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Logged in
+  // Logged in as editor
   return <>{children}</>;
 }

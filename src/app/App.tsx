@@ -5,8 +5,11 @@ import { HomePage } from "./components/HomePage";
 import { ArticlePage } from "./components/ArticlePage";
 import { CategoryPage } from "./components/CategoryPage";
 import { Footer } from "./components/Footer";
+import { Login } from "./components/Login";
 import { AdminLogin } from "./components/AdminLogin";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { EditorDashboard } from "./components/EditorDashboard";
+import { EditorProtectedRoute } from "./components/EditorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LiveTV from "./components/LiveTV";
 import EPaper from "./components/Epaper";
@@ -69,6 +72,8 @@ function AppLayout({ darkMode, setDarkMode }: { darkMode: boolean; setDarkMode: 
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/editor/dashboard" element={<EditorProtectedRoute> <EditorDashboard /> </EditorProtectedRoute>} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute> <AdminDashboard /> </ProtectedRoute> } />
           <Route path="/category/:slug" element={<CategoryPage />} />

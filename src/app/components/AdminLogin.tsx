@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import {
   Eye,
@@ -39,8 +39,9 @@ export function AdminLogin() {
         password
       );
 
-      if (result.user.email !== "sambadsironam@gmail.com") {
+      if (result.user.email !== "sambadsironam@gmail.com" && result.user.uid !== "15EZLzmUOzUel1PeAMshEmKqoRr1") {
         setError("Unauthorized user.");
+        await signOut(auth);
         setLoading(false);
         return;
       }

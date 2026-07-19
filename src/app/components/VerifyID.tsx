@@ -30,10 +30,12 @@ export default function VerifyID() {
         return;
       }
       try {
-        const docRef = doc(db, "workers", workerId);
+        const safeId = workerId.replace(/\//g, "_");
+        const docRef = doc(db, "workers", safeId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setWorker({ id: docSnap.id, ...docSnap.data() });
+          const data = docSnap.data();
+          setWorker({ id: data.id || docSnap.id, ...data });
         }
       } catch (err) {
         console.error("Error fetching worker details:", err);
@@ -84,12 +86,11 @@ export default function VerifyID() {
   const isSuspended = worker.status === "Suspended";
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden selectable">
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
       {/* Background patterns */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-20%] left-[-20%] h-[600px] w-[600px] rounded-full bg-blue-500/10 blur-[120px]"></div>
         <div className="absolute bottom-[-20%] right-[-20%] h-[600px] w-[600px] rounded-full bg-emerald-500/10 blur-[120px]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),transparent_70%)]"></div>
       </div>
 
       <div className="relative z-10 max-w-lg w-full">
@@ -138,109 +139,20 @@ export default function VerifyID() {
             )}
           </div>
 
-          {/* Body Section */}
-          <div className="p-6 md:p-8">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              {/* Photo */}
-              <div className="relative flex-shrink-0">
-                <div
-                  className={`w-32 h-32 md:w-36 md:h-36 rounded-2xl overflow-hidden border-2 ${
-                    isActive ? "border-emerald-500" : "border-red-500"
-                  } shadow-lg bg-slate-800`}
-                >
-                  {worker.photo ? (
-                    <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-800 text-gray-500">
-                      No Photo
-                    </div>
-                  )}
-                </div>
-                {isActive && (
-                  <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-slate-950 p-1.5 rounded-full shadow-lg">
-                    <ShieldCheck size={20} />
-                  </div>
-                )}
+          {/* Body Section - Displays the exact ID card image in full size */}
+          <div className="p-4 flex flex-col items-center justify-center bg-slate-950">
+            {worker.photo ? (
+              <img
+                src={worker.photo}
+                alt="Official ID Card"
+                className="w-full h-auto object-contain rounded-2xl shadow-lg border border-slate-800"
+                style={{ maxHeight: "75vh" }}
+              />
+            ) : (
+              <div className="py-12 text-gray-500 font-semibold">
+                আইডি কার্ডের ছবি খুঁজে পাওয়া যায়নি।
               </div>
-
-              {/* General Details */}
-              <div className="flex-1 text-center md:text-left min-w-0">
-                <h2
-                  className="text-2xl font-bold text-white mb-1"
-                  style={{ fontFamily: "'Noto Serif Bengali', serif" }}
-                >
-                  {worker.name}
-                </h2>
-                <p
-                  className="text-yellow-400 font-semibold text-base mb-3 flex items-center justify-center md:justify-start gap-1"
-                  style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-                >
-                  <Award size={16} />
-                  {worker.designation}
-                </p>
-
-                <div
-                  className="space-y-2 text-sm text-gray-300"
-                  style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-                >
-                  <div className="flex items-center justify-center md:justify-start gap-2">
-                    <span className="text-gray-500">আইডি নং:</span>
-                    <span className="font-bold text-white">{worker.id}</span>
-                  </div>
-                  {worker.bloodGroup && (
-                    <div className="flex items-center justify-center md:justify-start gap-2">
-                      <span className="text-gray-500">রক্তের গ্রুপ:</span>
-                      <span className="text-red-400 font-bold">{worker.bloodGroup}</span>
-                    </div>
-                  )}
-                  {worker.validUntil && (
-                    <div className="flex items-center justify-center md:justify-start gap-2">
-                      <Calendar size={14} className="text-gray-500" />
-                      <span className="text-gray-500">মেয়াদ শেষ:</span>
-                      <span className="font-semibold text-white">{worker.validUntil}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Extra Info Grid */}
-            <div
-              className="mt-6 pt-6 border-t border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-400"
-              style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-            >
-              {worker.phone && (
-                <div className="flex items-center gap-2 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
-                  <Phone size={14} className="text-blue-400" />
-                  <div>
-                    <div className="text-[10px] text-gray-600">ফোন নম্বর</div>
-                    <div className="text-white font-medium">{worker.phone}</div>
-                  </div>
-                </div>
-              )}
-              {worker.email && (
-                <div className="flex items-center gap-2 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
-                  <Mail size={14} className="text-emerald-400" />
-                  <div>
-                    <div className="text-[10px] text-gray-600">ইমেইল</div>
-                    <div className="text-white font-medium truncate">{worker.email}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Live Security Stamp */}
-            <div className="mt-6 bg-slate-950 border border-slate-800/60 rounded-xl p-3.5 text-center">
-              <div className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">
-                Security Digital Signature
-              </div>
-              <div className="text-xs font-mono text-emerald-400 font-bold tracking-wider">
-                {currentTime}
-              </div>
-              <div className="text-[9px] text-slate-600 mt-1">
-                Generated dynamically. Valid for immediate field checks.
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
