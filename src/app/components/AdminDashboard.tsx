@@ -33,10 +33,12 @@ export function AdminDashboard() {
   const [workerBloodGroup, setWorkerBloodGroup] = useState("");
   const [workerValidUntil, setWorkerValidUntil] = useState("");
   const [workerPhoto, setWorkerPhoto] = useState<File | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [workerStatus, setWorkerStatus] = useState("Active");
   const [uploadingWorker, setUploadingWorker] = useState(false);
   const [editingWorkerId, setEditingWorkerId] = useState<string | null>(null);
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
+  const [existingProfilePhotoUrl, setExistingProfilePhotoUrl] = useState("");
 
   const fetchWorkers = async () => {
     setLoadingWorkers(true);
@@ -46,9 +48,9 @@ export function AdminDashboard() {
       const list = querySnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
+          ...data,
           id: doc.id,
           workerId: data.id || doc.id,
-          ...data,
         };
       });
       setWorkers(list);
@@ -107,6 +109,13 @@ export function AdminDashboard() {
         photoUrl = await getDownloadURL(photoRef);
       }
 
+      let profilePhotoUrl = existingProfilePhotoUrl || "";
+      if (profilePhoto) {
+        const profilePhotoRef = ref(storage, `profiles/${safeId}-${Date.now()}-${profilePhoto.name}`);
+        await uploadBytes(profilePhotoRef, profilePhoto);
+        profilePhotoUrl = await getDownloadURL(profilePhotoRef);
+      }
+
       // If we are editing, and the document ID has changed (e.g. they edited worker ID)
       if (editingWorkerId && editingWorkerId !== safeId) {
         await deleteDoc(doc(db, "workers", editingWorkerId));
@@ -122,6 +131,7 @@ export function AdminDashboard() {
         bloodGroup: workerBloodGroup,
         validUntil: workerValidUntil,
         photo: photoUrl,
+        profilePhoto: profilePhotoUrl,
         status: workerStatus,
         createdAt: serverTimestamp(),
       });
@@ -137,9 +147,11 @@ export function AdminDashboard() {
       setWorkerBloodGroup("");
       setWorkerValidUntil("");
       setWorkerPhoto(null);
+      setProfilePhoto(null);
       setWorkerStatus("Active");
       setEditingWorkerId(null);
       setExistingPhotoUrl("");
+      setExistingProfilePhotoUrl("");
 
       fetchWorkers();
     } catch (error: any) {
@@ -162,7 +174,9 @@ export function AdminDashboard() {
     setWorkerValidUntil(worker.validUntil || "");
     setWorkerStatus(worker.status || "Active");
     setExistingPhotoUrl(worker.photo || "");
+    setExistingProfilePhotoUrl(worker.profilePhoto || "");
     setWorkerPhoto(null);
+    setProfilePhoto(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -177,8 +191,10 @@ export function AdminDashboard() {
     setWorkerBloodGroup("");
     setWorkerValidUntil("");
     setWorkerPhoto(null);
+    setProfilePhoto(null);
     setWorkerStatus("Active");
     setExistingPhotoUrl("");
+    setExistingProfilePhotoUrl("");
   };
 
   const handleWorkerDelete = async (id: string) => {
@@ -433,7 +449,40 @@ export function AdminDashboard() {
                 background: "#fff",
               }}
             />
+            {existingPhotoUrl && (
+              <span style={{ fontSize: "0.8rem", color: "#666", display: "block", marginTop: "5px" }}>
+                Current ID Card: <a href={existingPhotoUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#0284c7" }}>View Image</a>
+              </span>
+            )}
           </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "20px" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "bold", marginBottom: "5px" }}>প্রোফাইল ছবি (Profile Photo)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setProfilePhoto(e.target.files[0]);
+                }
+              }}
+              style={{
+                width: "100%",
+                padding: "8px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+                background: "#fff",
+              }}
+            />
+            {existingProfilePhotoUrl && (
+              <span style={{ fontSize: "0.8rem", color: "#666", display: "block", marginTop: "5px" }}>
+                Current Profile Pic: <a href={existingProfilePhotoUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#0284c7" }}>View Image</a>
+              </span>
+            )}
+          </div>
+          <div></div>
         </div>
 
         <div style={{ display: "flex", gap: "10px" }}>
@@ -499,30 +548,47 @@ export function AdminDashboard() {
             >
               <div style={{ display: "flex", alignItems: "center", gap: "15px", flex: 1, minWidth: 0 }}>
                 <div style={{ width: "50px", height: "50px", borderRadius: "50%", overflow: "hidden", background: "#dee2e6", flexShrink: 0 }}>
-                  {w.photo ? (
-                    <img src={w.photo} alt={w.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  {w.profilePhoto ? (
+                    <img src={w.profilePhoto} alt={w.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#6c757d", fontSize: "0.8rem" }}>No Pic</div>
                   )}
                 </div>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", color: "#212529" }}>{w.name}</h4>
-                  <div style={{ fontSize: "0.8rem", color: "#495057", marginTop: "2px" }}>
-                    ID: <strong>{w.workerId || w.id}</strong> | Designation: <strong>{w.designation}</strong>
-                  </div>
-                  <div style={{ marginTop: "4px" }}>
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        padding: "2px 8px",
-                        borderRadius: "4px",
-                        fontWeight: "bold",
-                        background: w.status === "Active" ? "#d4edda" : w.status === "Suspended" ? "#f8d7da" : "#fff3cd",
-                        color: w.status === "Active" ? "#155724" : w.status === "Suspended" ? "#721c24" : "#856404",
-                      }}
-                    >
-                      {w.status}
-                    </span>
+                  <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "bold", color: "#0B1F3A" }}>{w.name}</h4>
+                  
+                  <div 
+                    style={{ 
+                      display: "grid", 
+                      gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
+                      gap: "8px 16px", 
+                      marginTop: "10px", 
+                      fontSize: "0.85rem", 
+                      color: "#495057" 
+                    }}
+                  >
+                    <div style={{ whiteSpace: "nowrap" }}>🆔 ID: <strong style={{ color: "#212529" }}>{w.workerId || w.id}</strong></div>
+                    <div style={{ whiteSpace: "nowrap" }}>
+                      ⚡ Status:{" "}
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          fontWeight: "bold",
+                          background: w.status === "Active" ? "#d4edda" : w.status === "Suspended" ? "#f8d7da" : "#fff3cd",
+                          color: w.status === "Active" ? "#155724" : w.status === "Suspended" ? "#721c24" : "#856404",
+                        }}
+                      >
+                        {w.status}
+                      </span>
+                    </div>
+                    <div style={{ whiteSpace: "nowrap" }}>📅 DOB: <strong style={{ color: "#212529" }}>{w.dob || "N/A"}</strong></div>
+                    <div style={{ whiteSpace: "nowrap" }}>📞 Phone: <strong style={{ color: "#212529" }}>{w.phone || "N/A"}</strong></div>
+                    <div style={{ whiteSpace: "nowrap" }}>🩸 Blood Group: <strong style={{ color: "#212529" }}>{w.bloodGroup || "N/A"}</strong></div>
+                    <div style={{ whiteSpace: "nowrap" }}>⏳ Valid Until: <strong style={{ color: "#212529" }}>{w.validUntil || "N/A"}</strong></div>
+                    <div style={{ whiteSpace: "nowrap", gridColumn: "span 2" }}>✉️ Email: <strong style={{ color: "#212529" }}>{w.email || "N/A"}</strong></div>
+                    <div style={{ whiteSpace: "nowrap", gridColumn: "span 2" }}>💼 Designation: <strong style={{ color: "#212529" }}>{w.designation}</strong></div>
                   </div>
                 </div>
               </div>
