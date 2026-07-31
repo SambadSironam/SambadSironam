@@ -16,6 +16,7 @@ import EPaper from "./components/Epaper";
 import ContactPage from "./components/Contact";
 import VideosPage from "./components/VideosPage";
 import VerifyID from "./components/VerifyID";
+import VerifyCar from "./components/VerifyCar";
 import SectionPage from "./components/SectionPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsConditions from "./components/TermsConditions";
@@ -84,6 +85,7 @@ function AppLayout({ darkMode, setDarkMode }: { darkMode: boolean; setDarkMode: 
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/section/:slug" element={<SectionPage />} />
           <Route path="/verify-id" element={<VerifyID />} />
+          <Route path="/verify-car" element={<VerifyCar />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/videos" element={<VideosPage />} />
