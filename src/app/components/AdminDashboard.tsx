@@ -1214,7 +1214,7 @@ export function AdminDashboard() {
                         <div
                           style={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
                             gap: "8px 16px",
                             marginTop: "10px",
                             fontSize: "0.85rem",
@@ -1237,7 +1237,7 @@ export function AdminDashboard() {
                               {c.status}
                             </span>
                           </div>
-                          <div style={{ whiteSpace: "nowrap" }}>👤 Owner/Driver: <strong style={{ color: "#212529" }}>{c.ownerName || "N/A"}</strong></div>
+                          <div style={{ whiteSpace: "nowrap", gridColumn: "span 2" }}>👤 Owner/Driver: <strong style={{ color: "#212529" }}>{c.ownerName || "N/A"}</strong></div>
                           <div style={{ whiteSpace: "nowrap" }}>💼 Role: <strong style={{ color: "#212529" }}>{c.designation || "N/A"}</strong></div>
                           <div style={{ whiteSpace: "nowrap" }}>📞 Phone: <strong style={{ color: "#212529" }}>{c.phone || "N/A"}</strong></div>
                           <div style={{ whiteSpace: "nowrap" }}>⏳ Valid Until: <strong style={{ color: "#212529" }}>{c.validUntil || "N/A"}</strong></div>
